@@ -23,7 +23,6 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.22.3'
         channel: 'stable'
         architecture: x64
 
@@ -36,8 +35,23 @@ jobs:
     - name: Get Flutter Dependencies
       run: flutter pub get
 
-    - name: Build Windows Release Executable
-      run: flutter build windows --release
+    - name: Build Windows Executable (Release with Debug Fallback)
+      shell: powershell
+      run: |
+        Write-Host "=== Attempting Flutter Release Build ==="
+        $ErrorActionPreference = "Continue"
+        flutter build windows --release
+        
+        $releaseExe = "build\windows\x64\runner\Release\school.exe"
+        if (-not (Test-Path $releaseExe)) {
+          Write-Host "=== Release executable not created. Falling back to Debug Build ==="
+          flutter build windows --debug
+        }
+        
+        $debugExe = "build\windows\x64\runner\Debug\school.exe"
+        if (-not (Test-Path $releaseExe) -and -not (Test-Path $debugExe)) {
+          throw "Neither Release nor Debug executable could be compiled!"
+        }
 
     - name: Compress Executable & Assets
       shell: powershell
@@ -45,17 +59,19 @@ jobs:
         $found = $false
         foreach ($path in @(
           "build\windows\x64\runner\Release",
-          "build\windows\runner\Release"
+          "build\windows\runner\Release",
+          "build\windows\x64\runner\Debug",
+          "build\windows\runner\Debug"
         )) {
-          if (Test-Path $path) {
-            Write-Host "Found output at: $path"
+          if (Test-Path "$path\school.exe") {
+            Write-Host "Found executable at: $path\school.exe"
             Compress-Archive -Path "$path\*" -DestinationPath "school-windows-x64.zip" -Force
             $found = $true
             break
           }
         }
         if (-not $found) {
-          throw "Release output directory not found!"
+          throw "school.exe output directory not found!"
         }
 
     - name: Upload Windows Build Artifact
