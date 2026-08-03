@@ -17,11 +17,14 @@ jobs:
 
     - name: Set up MSVC Developer Command Prompt
       uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
+        architecture: x64
 
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
@@ -33,7 +36,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release -v
+      run: flutter build windows --release
 
     - name: Compress Executable & Assets
       shell: powershell
