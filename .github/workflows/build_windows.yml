@@ -27,11 +27,22 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release -v
+      run: flutter build windows --release
 
     - name: Compress Executable & Assets
+      shell: powershell
       run: |
-        powershell Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "school-windows-x64.zip"
+        if (Test-Path "build\windows\x64\runner\Release") {
+          Write-Host "Compressing build\windows\x64\runner\Release..."
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "school-windows-x64.zip" -Force
+        } elseif (Test-Path "build\windows\runner\Release") {
+          Write-Host "Compressing build\windows\runner\Release..."
+          Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath "school-windows-x64.zip" -Force
+        } else {
+          Write-Host "Searching build directory..."
+          Get-ChildItem -Path "build" -Recurse
+          throw "Release output directory not found!"
+        }
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
