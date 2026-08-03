@@ -36,10 +36,58 @@ jobs:
     - name: Build Windows Executable
       shell: powershell
       run: |
-        $p = Start-Process -FilePath "flutter.bat" -ArgumentList "build","windows","--release","-v" -NoNewWindow -PassThru -Wait
-        if ($p.ExitCode -ne 0) {
-          throw "Flutter build windows --release failed with exit code $($p.ExitCode)"
+        $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $processInfo.FileName = "flutter.bat"
+        $processInfo.Arguments = "build windows --release -v"
+        $processInfo.RedirectStandardOutput = $true
+        $processInfo.RedirectStandardError = $true
+        $processInfo.UseShellExecute = $false
+        $processInfo.CreateNoWindow = $true
+
+        $process = New-Object System.Diagnostics.Process
+        $process.StartInfo = $processInfo
+
+        $log = New-Object System.Collections.Generic.List[string]
+
+        $outHandler = {
+            if ($EventArgs.Data) {
+                Write-Host $EventArgs.Data
+                $log.Add($EventArgs.Data)
+            }
         }
+
+        $errHandler = {
+            if ($EventArgs.Data) {
+                Write-Host $EventArgs.Data
+                $log.Add($EventArgs.Data)
+            }
+        }
+
+        Register-ObjectEvent -InputObject $process -EventName "OutputDataReceived" -Action $outHandler | Out-Null
+        Register-ObjectEvent -InputObject $process -EventName "ErrorDataReceived" -Action $errHandler | Out-Null
+
+        $process.Start() | Out-Null
+        $process.BeginOutputReadLine()
+        $process.BeginErrorReadLine()
+        $process.WaitForExit()
+
+        $log | Out-File -FilePath "build_log_full.txt" -Encoding utf8
+
+        if ($process.ExitCode -ne 0) {
+            Write-Host "==================== FATAL BUILD ERROR DETECTED ===================="
+            $matches = $log | Select-String -Pattern "error","failed","fatal","CMake Error","MSB"
+            foreach ($m in $matches) {
+                Write-Host ">> " $m.Line
+            }
+            exit $process.ExitCode
+        }
+
+    - name: Upload Full Diagnostic Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log-full
+        path: build_log_full.txt
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
