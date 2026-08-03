@@ -35,22 +35,14 @@ jobs:
     - name: Get Flutter Dependencies
       run: flutter pub get
 
-    - name: Build Windows Executable (Release with Debug Fallback)
+    - name: Build Windows Executable
       shell: powershell
       run: |
-        Write-Host "=== Attempting Flutter Release Build ==="
         $ErrorActionPreference = "Continue"
-        flutter build windows --release
-        
-        $releaseExe = "build\windows\x64\runner\Release\school.exe"
-        if (-not (Test-Path $releaseExe)) {
-          Write-Host "=== Release executable not created. Falling back to Debug Build ==="
-          flutter build windows --debug
-        }
-        
-        $debugExe = "build\windows\x64\runner\Debug\school.exe"
-        if (-not (Test-Path $releaseExe) -and -not (Test-Path $debugExe)) {
-          throw "Neither Release nor Debug executable could be compiled!"
+        Write-Host "=== Building Windows Executable (Debug Standalone) ==="
+        flutter build windows --debug
+        if ($LASTEXITCODE -ne 0) {
+          throw "Flutter build windows debug failed with exit code $LASTEXITCODE"
         }
 
     - name: Compress Executable & Assets
@@ -58,10 +50,10 @@ jobs:
       run: |
         $found = $false
         foreach ($path in @(
-          "build\windows\x64\runner\Release",
-          "build\windows\runner\Release",
           "build\windows\x64\runner\Debug",
-          "build\windows\runner\Debug"
+          "build\windows\runner\Debug",
+          "build\windows\x64\runner\Release",
+          "build\windows\runner\Release"
         )) {
           if (Test-Path "$path\school.exe") {
             Write-Host "Found executable at: $path\school.exe"
