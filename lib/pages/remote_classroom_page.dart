@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
@@ -13,6 +14,10 @@ class RemoteClassroomPage extends StatefulWidget {
 
 class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
   final List<String> _students = ['李小明', '王芳芳', '张伟', '陈亮亮', '赵子涵', '孙悦'];
+
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
+  bool _isCameraLoading = false;
 
   static const List<String> _localModes = [
     '数字课堂',
@@ -34,6 +39,56 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
   ];
 
   @override
+  void dispose() {
+    _cameraController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleCamera() async {
+    if (_isCameraInitialized) {
+      await _cameraController?.dispose();
+      _cameraController = null;
+      setState(() {
+        _isCameraInitialized = false;
+      });
+    } else {
+      setState(() => _isCameraLoading = true);
+      try {
+        final cameras = await availableCameras();
+        if (cameras.isNotEmpty) {
+          _cameraController = CameraController(
+            cameras.first,
+            ResolutionPreset.high,
+            enableAudio: false,
+          );
+          await _cameraController!.initialize();
+          if (mounted) {
+            setState(() {
+              _isCameraInitialized = true;
+              _isCameraLoading = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() => _isCameraLoading = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('未检测到可用物理摄像头，已自动切换为仿真高清流。')),
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('Camera initialization error: $e');
+        if (mounted) {
+          setState(() => _isCameraLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('摄像头初始化失败: $e，已使用高清仿真画质')),
+          );
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
@@ -46,41 +101,59 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
             // Top Interactive Control Bar
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          '远程互动教学空间',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Flexible(
+                            child: Text(
+                              '远程互动教学空间',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        TechBadge(
-                          label: appState.isStudentFocused
-                              ? '聚焦中: ${appState.focusedStudentName} 站立发言'
-                              : '名师视角全景监控',
-                          color: appState.isStudentFocused
-                              ? AppColors.accentGreen
-                              : AppColors.primary,
-                          icon: appState.isStudentFocused
-                              ? Icons.center_focus_strong
-                              : Icons.videocam,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '多端音画实时同步传输 • AI 自动视频聚焦与课堂数据自动统计',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                  ],
+                          const SizedBox(width: 12),
+                          TechBadge(
+                            label: appState.isStudentFocused
+                                ? '聚焦中: ${appState.focusedStudentName} 站立发言'
+                                : '名师视角全景监控',
+                            color: appState.isStudentFocused
+                                ? AppColors.accentGreen
+                                : AppColors.primary,
+                            icon: appState.isStudentFocused
+                                ? Icons.center_focus_strong
+                                : Icons.videocam,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '多端音画实时同步传输 • AI 自动视频聚焦与真实摄像头录播支持',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
+
+                // Real Camera Toggle Button
+                TechButton(
+                  label: _isCameraLoading
+                      ? '摄像头启动中...'
+                      : (_isCameraInitialized ? '切换为高清仿真画质' : '开启真实本地摄像头'),
+                  icon: _isCameraInitialized ? Icons.camera_alt : Icons.videocam,
+                  isSecondary: !_isCameraInitialized,
+                  onPressed: _isCameraLoading ? () {} : _toggleCamera,
+                ),
+                const SizedBox(width: 12),
 
                 // Recording Control Button
                 TechButton(
@@ -184,7 +257,7 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left/Main Video Feed (Master Teacher or Focused Student)
+                  // Left/Main Video Feed (Master Teacher or Real Camera / Focused Student)
                   Expanded(
                     flex: 3,
                     child: AnimatedContainer(
@@ -211,40 +284,48 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                       ),
                       child: Stack(
                         children: [
-                          // Simulated Master Video Background Graphics
-                          Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  appState.isStudentFocused
-                                      ? Icons.person_pin
-                                      : Icons.cast_for_education,
-                                  size: 80,
-                                  color: (appState.isStudentFocused
-                                          ? AppColors.accentGreen
-                                          : AppColors.primary)
-                                      .withOpacity(0.6),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  appState.isStudentFocused
-                                      ? '【站立发言聚焦中】学生：${appState.focusedStudentName}'
-                                      : '【名师主讲画面】张正平 特级教师 - 都市阳台东组团主教室',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                          // Real Webcam Video Preview OR Simulated Screen
+                          if (_isCameraInitialized && _cameraController != null)
+                            Positioned.fill(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: CameraPreview(_cameraController!),
+                              ),
+                            )
+                          else
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    appState.isStudentFocused
+                                        ? Icons.person_pin
+                                        : Icons.cast_for_education,
+                                    size: 80,
+                                    color: (appState.isStudentFocused
+                                            ? AppColors.accentGreen
+                                            : AppColors.primary)
+                                        .withOpacity(0.6),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  '实时分辨率: 4K 60FPS • 音视频抖动率 < 0.1% • 自动音量智能平抑',
-                                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    appState.isStudentFocused
+                                        ? '【站立发言聚焦中】学生：${appState.focusedStudentName}'
+                                        : '【名师主讲画面】张正平 特级教师 - 都市阳台东组团主教室',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    '实时分辨率: 4K 60FPS • 音视频抖动率 < 0.1% • 自动音量智能平抑',
+                                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
 
                           // Top Stream Overlay info
                           Positioned(
@@ -253,20 +334,25 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.7),
+                                color: Colors.black.withOpacity(0.75),
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.cardBorder),
                               ),
                               child: Row(
                                 children: [
                                   PulseIndicator(
-                                    color: appState.isStudentFocused
-                                        ? AppColors.accentGreen
-                                        : AppColors.accentRed,
+                                    color: _isCameraInitialized
+                                        ? AppColors.primary
+                                        : (appState.isStudentFocused
+                                            ? AppColors.accentGreen
+                                            : AppColors.accentRed),
                                     size: 10,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    appState.isStudentFocused ? '智能追焦镜头已启用' : '主讲画面 LIVE',
+                                    _isCameraInitialized
+                                        ? '真实物理摄像头画面 (实时采集)'
+                                        : (appState.isStudentFocused ? '智能追焦镜头已启用' : '主讲画面 LIVE'),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -388,45 +474,54 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                                   ),
                                   child: Stack(
                                     children: [
-                                      Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 20,
-                                              backgroundColor: isFocused
-                                                  ? AppColors.accentGreen.withOpacity(0.2)
-                                                  : AppColors.primary.withOpacity(0.15),
-                                              child: Icon(
-                                                Icons.person,
-                                                color: isFocused
-                                                    ? AppColors.accentGreen
-                                                    : AppColors.primary,
+                                      // If student is focused & camera is on, show camera inside focus tile as well
+                                      if (isFocused && _isCameraInitialized && _cameraController != null)
+                                        Positioned.fill(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: CameraPreview(_cameraController!),
+                                          ),
+                                        )
+                                      else
+                                        Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 20,
+                                                backgroundColor: isFocused
+                                                    ? AppColors.accentGreen.withOpacity(0.2)
+                                                    : AppColors.primary.withOpacity(0.15),
+                                                child: Icon(
+                                                  Icons.person,
+                                                  color: isFocused
+                                                      ? AppColors.accentGreen
+                                                      : AppColors.primary,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              studentName,
-                                              style: TextStyle(
-                                                color: isFocused
-                                                    ? AppColors.accentGreen
-                                                    : AppColors.textPrimary,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13,
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                studentName,
+                                                style: TextStyle(
+                                                  color: isFocused
+                                                      ? AppColors.accentGreen
+                                                      : AppColors.textPrimary,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13,
+                                                ),
                                               ),
-                                            ),
-                                            Text(
-                                              index % 2 == 0 ? '举手请求发言' : '专注听课中',
-                                              style: TextStyle(
-                                                color: index % 2 == 0
-                                                    ? AppColors.accentOrange
-                                                    : AppColors.textMuted,
-                                                fontSize: 10,
+                                              Text(
+                                                index % 2 == 0 ? '举手请求发言' : '专注听课中',
+                                                style: TextStyle(
+                                                  color: index % 2 == 0
+                                                      ? AppColors.accentOrange
+                                                      : AppColors.textMuted,
+                                                  fontSize: 10,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                      ),
 
                                       // Focus Status Badge on thumbnail
                                       Positioned(
