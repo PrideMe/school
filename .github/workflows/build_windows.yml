@@ -29,19 +29,14 @@ jobs:
     - name: Build Windows Release Executable
       shell: powershell
       run: |
-        flutter build windows --release 2>&1 | Tee-Object -FilePath build_full_output.log
-        if ($LASTEXITCODE -ne 0) {
-          Write-Host "================== BUILD LOG TAIL =================="
-          Get-Content build_full_output.log -Tail 150
-          exit $LASTEXITCODE
+        $ErrorActionPreference = "Continue"
+        if (Test-Path env:PSNativeCommandUseErrorActionPreference) {
+          $PSNativeCommandUseErrorActionPreference = $false
         }
-
-    - name: Upload Build Log Artifacts on Failure
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-failure-logs
-        path: build_full_output.log
+        flutter build windows --release
+        if ($LASTEXITCODE -ne 0) {
+          throw "Flutter build windows exited with code $LASTEXITCODE"
+        }
 
     - name: Compress Executable & Assets
       shell: powershell
