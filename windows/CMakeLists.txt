@@ -41,6 +41,7 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
   target_compile_options(${TARGET} PRIVATE /W4 /wd"4100")
   target_compile_options(${TARGET} PRIVATE /EHsc)
+  target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
 endfunction()
 
@@ -58,31 +59,32 @@ include(flutter/generated_plugins.cmake)
 
 
 # === Installation ===
-# Support files are copied into place next to the executable, so that it can
-# run in place. This is done instead of making a separate bundle (as on Linux)
-# so that building and running from within Visual Studio will work.
+# Support files are copied into the output directory, and lines added to the
+# install rule to copy them into the bundle structures.
+
+# Copy the Flutter DLL and data files to the output directory.
+# CMAKE_INSTALL_PREFIX is the build output directory.
 set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
-# Make the "install" step default, as it's required to run.
-set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
-endif()
+set(PROJECT_BUILD_DIR "${CMAKE_CURRENT_BUILD_DIR}/")
+set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 
-set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
-set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
+# Fetch the native assets provided by build.dart.
+include("${FLUTTER_MANAGED_DIR}/ephemeral/generated_config.cmake" OPTIONAL)
 
-install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
-  COMPONENT Runtime)
+install(CODE "
+  file(REMOVE_RECURSE \"${BUILD_BUNDLE_DIR}/data\")
+  " COMPONENT Runtime)
 
-install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
-  COMPONENT Runtime)
+install(FILES $<TARGET_FILE:flutter> DESTINATION "${BUILD_BUNDLE_DIR}" COMPONENT Runtime)
 
-install(FILES "${FLUTTER_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-  COMPONENT Runtime)
+install(DIRECTORY "${FLUTTER_MANAGED_DIR}/ephemeral/cpp_client_wrapper_mesh/"
+  DESTINATION "${BUILD_BUNDLE_DIR}"
+  COMPONENT Runtime
+  OPTIONAL)
 
-if(PLUGIN_BUNDLED_LIBRARIES)
-  install(FILES "${PLUGIN_BUNDLED_LIBRARIES}"
-    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+if(EXISTS "${PROJECT_BUILD_DIR}flutter_assets")
+  install(DIRECTORY "${PROJECT_BUILD_DIR}flutter_assets"
+    DESTINATION "${BUILD_BUNDLE_DIR}"
     COMPONENT Runtime)
 endif()
 
@@ -90,7 +92,7 @@ endif()
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")
 if(EXISTS "${NATIVE_ASSETS_DIR}")
   install(DIRECTORY "${NATIVE_ASSETS_DIR}"
-     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+     DESTINATION "${BUILD_BUNDLE_DIR}"
      COMPONENT Runtime)
 endif()
 
