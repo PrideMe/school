@@ -27,7 +27,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release
+      run: flutter build windows --release -v
 
     - name: Compress Executable & Assets
       run: |
