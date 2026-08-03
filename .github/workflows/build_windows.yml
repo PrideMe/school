@@ -15,59 +15,23 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up MSVC Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
-
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
-        architecture: x64
+        cache: true
 
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
-
-    - name: Clean Flutter Cache
-      run: flutter clean
 
     - name: Get Flutter Dependencies
       run: flutter pub get
 
     - name: Build Windows Executable
-      shell: powershell
-      run: |
-        $ErrorActionPreference = "Continue"
-        Write-Host "=== Building Windows Executable (Debug Standalone) ==="
-        flutter build windows --debug
-        if ($LASTEXITCODE -ne 0) {
-          throw "Flutter build windows debug failed with exit code $LASTEXITCODE"
-        }
-
-    - name: Compress Executable & Assets
-      shell: powershell
-      run: |
-        $found = $false
-        foreach ($path in @(
-          "build\windows\x64\runner\Debug",
-          "build\windows\runner\Debug",
-          "build\windows\x64\runner\Release",
-          "build\windows\runner\Release"
-        )) {
-          if (Test-Path "$path\school.exe") {
-            Write-Host "Found executable at: $path\school.exe"
-            Compress-Archive -Path "$path\*" -DestinationPath "school-windows-x64.zip" -Force
-            $found = $true
-            break
-          }
-        }
-        if (-not $found) {
-          throw "school.exe output directory not found!"
-        }
+      run: flutter build windows --release
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: school-windows-exe
-        path: school-windows-x64.zip
+        path: build/windows/x64/runner/Release/
