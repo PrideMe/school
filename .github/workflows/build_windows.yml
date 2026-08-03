@@ -36,4 +36,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: school-windows-exe
-        path: build/windows/x64/bundle/
+        path: build/windows/x64/runner/Release/**
