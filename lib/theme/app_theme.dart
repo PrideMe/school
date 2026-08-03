@@ -15,7 +15,7 @@ class AppTheme {
         error: AppColors.accentRed,
       ),
       fontFamily: 'PingFang SC',
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardBg,
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -33,7 +33,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
         alignment: Alignment.center,
         elevation: 24,
