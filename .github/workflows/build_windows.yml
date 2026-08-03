@@ -24,6 +24,9 @@ jobs:
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
 
+    - name: Clean Flutter Build Cache
+      run: flutter clean
+
     - name: Get Flutter Dependencies
       run: flutter pub get
 
