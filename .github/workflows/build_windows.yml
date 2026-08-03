@@ -21,9 +21,6 @@ jobs:
         flutter-version: '3.24.5'
         channel: 'stable'
 
-    - name: Flutter Doctor
-      run: flutter doctor -v
-
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
 
@@ -31,7 +28,15 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release --verbose
+      shell: cmd
+      run: flutter build windows --release --verbose > build_verbose.log 2>&1
+
+    - name: Display Build Failure Log
+      if: failure()
+      shell: powershell
+      run: |
+        Write-Host "=== LAST 200 LINES OF BUILD VERBOSE LOG ==="
+        Get-Content build_verbose.log -Tail 200
 
     - name: Compress Executable & Assets
       shell: powershell
@@ -39,8 +44,7 @@ jobs:
         $found = $false
         foreach ($path in @(
           "build\windows\x64\runner\Release",
-          "build\windows\runner\Release",
-          "build\windows\arm64\runner\Release"
+          "build\windows\runner\Release"
         )) {
           if (Test-Path $path) {
             Write-Host "Found output at: $path"
@@ -50,8 +54,6 @@ jobs:
           }
         }
         if (-not $found) {
-          Write-Host "=== Build directory listing ==="
-          Get-ChildItem -Path "build" -Recurse -Depth 5 | Select-Object FullName
           throw "Release output directory not found!"
         }
 
@@ -60,3 +62,10 @@ jobs:
       with:
         name: school-windows-exe
         path: school-windows-x64.zip
+
+    - name: Upload Diagnostic Logs on Failure
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-diagnostic-log
+        path: build_verbose.log
