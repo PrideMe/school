@@ -397,8 +397,11 @@ class _ToeflIeltsPageState extends State<ToeflIeltsPage> with SingleTickerProvid
               label: '开始发布模拟考试',
               onPressed: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已发布全校托福/雅思模拟考试任务！')),
+                showTechNoticeDialog(
+                  context,
+                  title: '模考任务发布成功',
+                  message: '已成功发布全校托福/雅思全真模拟考试，并同步开启 AI 抓拍与智能考场监测！',
+                  icon: Icons.quiz,
                 );
               },
             ),

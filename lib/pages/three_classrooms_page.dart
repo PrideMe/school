@@ -412,8 +412,11 @@ class _ThreeClassroomsPageState extends State<ThreeClassroomsPage>
               label: '立即创建并广播',
               onPressed: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已成功创建新“三个课堂”日程并同步多端广播！')),
+                showTechNoticeDialog(
+                  context,
+                  title: '新“三个课堂”日程已创建',
+                  message: '成功排定新课程日程，已完成连线教室推流广播与全网课表同步！',
+                  icon: Icons.video_call,
                 );
               },
             ),

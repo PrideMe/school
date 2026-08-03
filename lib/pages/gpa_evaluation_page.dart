@@ -353,8 +353,11 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
                 appState.updateStudentGpa(record.id, m, at, ac);
                 Navigator.pop(context);
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('已重新计算【${record.name}】的加权GPA档案！')),
+                showTechNoticeDialog(
+                  context,
+                  title: 'GPA 综合评价重新计算完成',
+                  message: '已成功更新并重新演算【${record.name}】的多维度加权 GPA 档案得分！',
+                  icon: Icons.grade,
                 );
               },
             ),

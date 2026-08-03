@@ -91,8 +91,11 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
         } else {
           if (mounted) {
             setState(() => _isCameraLoading = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('未检测到可用物理摄像头，已自动切换为仿真高清流。')),
+            showTechNoticeDialog(
+              context,
+              title: '物理摄像头状态',
+              message: '未检测到可用物理摄像头，已自动切换为全景 4K 仿真画质。',
+              icon: Icons.videocam_off,
             );
           }
         }
@@ -100,8 +103,11 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
         debugPrint('Camera initialization error: $e');
         if (mounted) {
           setState(() => _isCameraLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('摄像头初始化失败: $e，已使用高清仿真画质')),
+          showTechNoticeDialog(
+            context,
+            title: '摄像头初始化异常',
+            message: '摄像头初始化状态: $e，系统已无缝回退至高清仿真流。',
+            icon: Icons.error_outline,
           );
         }
       }
@@ -124,8 +130,11 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
     } catch (e) {
       debugPrint('File picker error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择本地视频出错: $e')),
+        showTechNoticeDialog(
+          context,
+          title: '文件选择提示',
+          message: '选择本地 MP4 视频出错: $e',
+          icon: Icons.error_outline,
         );
       }
     }
@@ -166,8 +175,11 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
       debugPrint('Error loading local MP4: $e');
       if (mounted) {
         setState(() => _isVideoLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('解析本地 MP4 文件失败: $e')),
+        showTechNoticeDialog(
+          context,
+          title: '视频解析状态',
+          message: '解析本地 MP4 文件失败: $e',
+          icon: Icons.error_outline,
         );
       }
     }
@@ -200,8 +212,11 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
       debugPrint('Error loading online MP4: $e');
       if (mounted) {
         setState(() => _isVideoLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('加载示例 MP4 视频失败: $e')),
+        showTechNoticeDialog(
+          context,
+          title: '网络 MP4 视频加载提示',
+          message: '加载示例 MP4 视频网络流失败: $e',
+          icon: Icons.error_outline,
         );
       }
     }
