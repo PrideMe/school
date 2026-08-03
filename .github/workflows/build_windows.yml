@@ -29,13 +29,14 @@ jobs:
 
     - name: Build Windows Executable
       shell: cmd
-      run: |
-        call flutter build windows --release --verbose > build.log 2>&1
-        if %ERRORLEVEL% NEQ 0 (
-          echo ==================== FULL BUILD LOG ====================
-          type build.log
-          exit /b %ERRORLEVEL%
-        )
+      run: call flutter build windows --release --verbose > build.log 2>&1
+
+    - name: Upload Raw Build Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: raw-build-log
+        path: build.log
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
