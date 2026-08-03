@@ -25,16 +25,20 @@ jobs:
         channel: 'stable'
 
     - name: Enable Windows Desktop Support
-      run: flutter config --enable-windows-desktop
+      shell: cmd
+      run: call flutter config --enable-windows-desktop
 
     - name: Clean Flutter Build Cache
-      run: flutter clean
+      shell: cmd
+      run: call flutter clean
 
     - name: Get Flutter Dependencies
-      run: flutter pub get
+      shell: cmd
+      run: call flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release
+      shell: cmd
+      run: call flutter build windows --release
 
     - name: Compress Executable & Assets
       shell: powershell
