@@ -8,10 +8,15 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // Hide native titlebar and native macOS traffic light buttons (red/yellow/green)
     self.titleVisibility = .hidden
     self.titlebarAppearsTransparent = true
     self.isMovableByWindowBackground = true
     self.styleMask.insert(.fullSizeContentView)
+
+    self.standardWindowButton(.closeButton)?.isHidden = true
+    self.standardWindowButton(.miniaturizeButton)?.isHidden = true
+    self.standardWindowButton(.zoomButton)?.isHidden = true
 
     RegisterGeneratedPlugins(registry: flutterViewController)
 
