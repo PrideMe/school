@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 import '../providers/app_state.dart';
 import '../theme/app_colors.dart';
 import '../theme/tech_widgets.dart';
@@ -15,9 +18,16 @@ class RemoteClassroomPage extends StatefulWidget {
 class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
   final List<String> _students = ['李小明', '王芳芳', '张伟', '陈亮亮', '赵子涵', '孙悦'];
 
+  // Real Webcam Controller
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isCameraLoading = false;
+
+  // MP4 Local/Sample Video Player Controller
+  VideoPlayerController? _videoPlayerController;
+  bool _isVideoInitialized = false;
+  bool _isVideoLoading = false;
+  String? _loadedVideoName;
 
   static const List<String> _localModes = [
     '数字课堂',
@@ -41,10 +51,20 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
   @override
   void dispose() {
     _cameraController?.dispose();
+    _videoPlayerController?.dispose();
     super.dispose();
   }
 
+  // Toggle Real Webcam
   Future<void> _toggleCamera() async {
+    // Turn off video player if active
+    if (_isVideoInitialized) {
+      await _videoPlayerController?.pause();
+      await _videoPlayerController?.dispose();
+      _videoPlayerController = null;
+      _isVideoInitialized = false;
+    }
+
     if (_isCameraInitialized) {
       await _cameraController?.dispose();
       _cameraController = null;
@@ -88,6 +108,111 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
     }
   }
 
+  // Pick and Play Local MP4 Video File
+  Future<void> _pickAndPlayLocalMp4() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mp4', 'mov', 'm4v', 'mkv', 'avi'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final filePath = result.files.single.path!;
+        final fileName = result.files.single.name;
+        await _initializeMp4File(File(filePath), fileName);
+      }
+    } catch (e) {
+      debugPrint('File picker error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('选择本地视频出错: $e')),
+        );
+      }
+    }
+  }
+
+  // Play Sample MP4 Stream
+  Future<void> _playSampleMp4() async {
+    const sampleUrl =
+        'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    await _initializeMp4Url(sampleUrl, '示例智慧公开课_物理演示.mp4');
+  }
+
+  Future<void> _initializeMp4File(File file, String name) async {
+    setState(() => _isVideoLoading = true);
+    // Turn off camera if active
+    if (_isCameraInitialized) {
+      await _cameraController?.dispose();
+      _cameraController = null;
+      _isCameraInitialized = false;
+    }
+
+    await _videoPlayerController?.dispose();
+
+    try {
+      _videoPlayerController = VideoPlayerController.file(file);
+      await _videoPlayerController!.initialize();
+      await _videoPlayerController!.setLooping(true);
+      await _videoPlayerController!.play();
+
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = true;
+          _isVideoLoading = false;
+          _loadedVideoName = name;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading local MP4: $e');
+      if (mounted) {
+        setState(() => _isVideoLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('解析本地 MP4 文件失败: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _initializeMp4Url(String url, String name) async {
+    setState(() => _isVideoLoading = true);
+    if (_isCameraInitialized) {
+      await _cameraController?.dispose();
+      _cameraController = null;
+      _isCameraInitialized = false;
+    }
+
+    await _videoPlayerController?.dispose();
+
+    try {
+      _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
+      await _videoPlayerController!.initialize();
+      await _videoPlayerController!.setLooping(true);
+      await _videoPlayerController!.play();
+
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = true;
+          _isVideoLoading = false;
+          _loadedVideoName = name;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading online MP4: $e');
+      if (mounted) {
+        setState(() => _isVideoLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加载示例 MP4 视频失败: $e')),
+        );
+      }
+    }
+  }
+
+  String _formatDuration(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
@@ -109,7 +234,7 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                         children: [
                           const Flexible(
                             child: Text(
-                              '远程互动教学空间',
+                              '远程互动教学空间 (学生观看/录播演示)',
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: AppColors.textPrimary,
@@ -120,58 +245,80 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                           ),
                           const SizedBox(width: 12),
                           TechBadge(
-                            label: appState.isStudentFocused
-                                ? '聚焦中: ${appState.focusedStudentName} 站立发言'
-                                : '名师视角全景监控',
-                            color: appState.isStudentFocused
-                                ? AppColors.accentGreen
-                                : AppColors.primary,
-                            icon: appState.isStudentFocused
-                                ? Icons.center_focus_strong
-                                : Icons.videocam,
+                            label: _isVideoInitialized
+                                ? '学生观看模式: 本地MP4播放中'
+                                : (appState.isStudentFocused
+                                    ? '聚焦中: ${appState.focusedStudentName} 站立发言'
+                                    : '名师视角全景监控'),
+                            color: _isVideoInitialized
+                                ? AppColors.accentOrange
+                                : (appState.isStudentFocused
+                                    ? AppColors.accentGreen
+                                    : AppColors.primary),
+                            icon: _isVideoInitialized
+                                ? Icons.play_circle_fill
+                                : (appState.isStudentFocused
+                                    ? Icons.center_focus_strong
+                                    : Icons.videocam),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        '多端音画实时同步传输 • AI 自动视频聚焦与真实摄像头录播支持',
+                      Text(
+                        _isVideoInitialized
+                            ? '当前播放文件: ${_loadedVideoName ?? "本地课程MP4"} • 支持实时进度拉拽与播放控制'
+                            : '多端音画实时同步传输 • AI 自动视频聚焦与本地 MP4 视频演示支持',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 12),
 
+                // Play Local MP4 Button
+                TechButton(
+                  label: _isVideoLoading
+                      ? '加载MP4中...'
+                      : (_isVideoInitialized ? '选择其他本地MP4' : '播放本地MP4视频'),
+                  icon: Icons.folder_open,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF8008), Color(0xFFFFC837)],
+                  ),
+                  onPressed: _isVideoLoading ? () {} : _pickAndPlayLocalMp4,
+                ),
+                const SizedBox(width: 8),
+
+                // Play Sample MP4 Stream Button
+                if (!_isVideoInitialized)
+                  TechButton(
+                    label: '演示示例MP4',
+                    icon: Icons.play_arrow,
+                    isSecondary: true,
+                    onPressed: _playSampleMp4,
+                  ),
+                const SizedBox(width: 8),
+
                 // Real Camera Toggle Button
                 TechButton(
                   label: _isCameraLoading
-                      ? '摄像头启动中...'
-                      : (_isCameraInitialized ? '切换为高清仿真画质' : '开启真实本地摄像头'),
+                      ? '启动中...'
+                      : (_isCameraInitialized ? '切回仿真流' : '开启摄像头'),
                   icon: _isCameraInitialized ? Icons.camera_alt : Icons.videocam,
                   isSecondary: !_isCameraInitialized,
                   onPressed: _isCameraLoading ? () {} : _toggleCamera,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
 
                 // Recording Control Button
                 TechButton(
-                  label: appState.isRecording ? '结束录播' : '开启课程实时录播',
+                  label: appState.isRecording ? '结束录播' : '开启录播',
                   icon: appState.isRecording ? Icons.stop_circle : Icons.fiber_manual_record,
                   gradient: appState.isRecording
                       ? const LinearGradient(colors: [Colors.red, Colors.redAccent])
                       : AppColors.primaryGradient,
                   onPressed: () => appState.toggleRecording(),
-                ),
-                const SizedBox(width: 12),
-
-                // View Course Report Button
-                TechButton(
-                  label: '生成/查看课堂评估报告',
-                  icon: Icons.analytics,
-                  isSecondary: true,
-                  onPressed: () => appState.setNavIndex(3),
                 ),
               ],
             ),
@@ -257,7 +404,7 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Left/Main Video Feed (Master Teacher or Real Camera / Focused Student)
+                  // Main Video Stage (Supports Local MP4 Video Player / Real Webcam / Simulation)
                   Expanded(
                     flex: 3,
                     child: AnimatedContainer(
@@ -267,16 +414,20 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: appState.isStudentFocused
-                              ? AppColors.accentGreen
-                              : AppColors.primary,
+                          color: _isVideoInitialized
+                              ? AppColors.accentOrange
+                              : (appState.isStudentFocused
+                                  ? AppColors.accentGreen
+                                  : AppColors.primary),
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: (appState.isStudentFocused
-                                    ? AppColors.accentGreen
-                                    : AppColors.primary)
+                            color: (_isVideoInitialized
+                                    ? AppColors.accentOrange
+                                    : (appState.isStudentFocused
+                                        ? AppColors.accentGreen
+                                        : AppColors.primary))
                                 .withOpacity(0.3),
                             blurRadius: 16,
                           )
@@ -284,14 +435,28 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                       ),
                       child: Stack(
                         children: [
-                          // Real Webcam Video Preview OR Simulated Screen
-                          if (_isCameraInitialized && _cameraController != null)
+                          // 1. MP4 Local Video Player Mode
+                          if (_isVideoInitialized && _videoPlayerController != null)
+                            Positioned.fill(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(14),
+                                child: AspectRatio(
+                                  aspectRatio: _videoPlayerController!.value.aspectRatio > 0
+                                      ? _videoPlayerController!.value.aspectRatio
+                                      : 16 / 9,
+                                  child: VideoPlayer(_videoPlayerController!),
+                                ),
+                              ),
+                            )
+                          // 2. Real Webcam Video Preview Mode
+                          else if (_isCameraInitialized && _cameraController != null)
                             Positioned.fill(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(14),
                                 child: CameraPreview(_cameraController!),
                               ),
                             )
+                          // 3. High-Tech Simulated Master Class Video Mode
                           else
                             Center(
                               child: Column(
@@ -320,14 +485,14 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                                   ),
                                   const SizedBox(height: 8),
                                   const Text(
-                                    '实时分辨率: 4K 60FPS • 音视频抖动率 < 0.1% • 自动音量智能平抑',
+                                    '实时分辨率: 4K 60FPS • 音视频抖动率 < 0.1% • 支持点击右上角“播放本地MP4视频”',
                                     style: TextStyle(color: Colors.grey, fontSize: 12),
                                   ),
                                 ],
                               ),
                             ),
 
-                          // Top Stream Overlay info
+                          // Top Stream Overlay info Badge
                           Positioned(
                             top: 16,
                             left: 16,
@@ -341,18 +506,24 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                               child: Row(
                                 children: [
                                   PulseIndicator(
-                                    color: _isCameraInitialized
-                                        ? AppColors.primary
-                                        : (appState.isStudentFocused
-                                            ? AppColors.accentGreen
-                                            : AppColors.accentRed),
+                                    color: _isVideoInitialized
+                                        ? AppColors.accentOrange
+                                        : (_isCameraInitialized
+                                            ? AppColors.primary
+                                            : (appState.isStudentFocused
+                                                ? AppColors.accentGreen
+                                                : AppColors.accentRed)),
                                     size: 10,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _isCameraInitialized
-                                        ? '真实物理摄像头画面 (实时采集)'
-                                        : (appState.isStudentFocused ? '智能追焦镜头已启用' : '主讲画面 LIVE'),
+                                    _isVideoInitialized
+                                        ? '学生听课视角 (本地 MP4 视频播放中)'
+                                        : (_isCameraInitialized
+                                            ? '真实物理摄像头画面 (实时采集)'
+                                            : (appState.isStudentFocused
+                                                ? '智能追焦镜头已启用'
+                                                : '主讲画面 LIVE')),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -364,49 +535,138 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                             ),
                           ),
 
-                          // Speaker Focus Reset Floating Action
-                          if (appState.isStudentFocused)
+                          // MP4 Video Scrub Bar & Floating Player Controls (When MP4 is active)
+                          if (_isVideoInitialized && _videoPlayerController != null)
                             Positioned(
-                              top: 16,
+                              bottom: 16,
+                              left: 16,
                               right: 16,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.accentRed,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                icon: const Icon(Icons.close, color: Colors.white, size: 16),
-                                label: const Text('重置切回名师全景', style: TextStyle(color: Colors.white)),
-                                onPressed: () => appState.toggleStudentFocus(),
-                              ),
-                            ),
+                              child: ValueListenableBuilder(
+                                valueListenable: _videoPlayerController!,
+                                builder: (context, VideoPlayerValue val, child) {
+                                  final position = val.position;
+                                  final duration = val.duration;
 
-                          // Bottom Simulated Electronic Whiteboard Toolbar
-                          Positioned(
-                            bottom: 16,
-                            left: 16,
-                            right: 16,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface.withOpacity(0.85),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.cardBorder),
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.8),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: AppColors.cardBorder),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Video Scrub Slider
+                                        SliderTheme(
+                                          data: SliderTheme.of(context).copyWith(
+                                            trackHeight: 4,
+                                            thumbShape: const RoundSliderThumbShape(
+                                                enabledThumbRadius: 6),
+                                            overlayShape: const RoundSliderOverlayShape(
+                                                overlayRadius: 12),
+                                            activeTrackColor: AppColors.accentOrange,
+                                            inactiveTrackColor: Colors.white24,
+                                            thumbColor: AppColors.accentOrange,
+                                          ),
+                                          child: Slider(
+                                            min: 0.0,
+                                            max: duration.inMilliseconds > 0
+                                                ? duration.inMilliseconds.toDouble()
+                                                : 1.0,
+                                            value: position.inMilliseconds
+                                                .clamp(0, duration.inMilliseconds)
+                                                .toDouble(),
+                                            onChanged: (v) {
+                                              _videoPlayerController!
+                                                  .seekTo(Duration(milliseconds: v.toInt()));
+                                            },
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            // Play / Pause Button
+                                            IconButton(
+                                              icon: Icon(
+                                                val.isPlaying
+                                                    ? Icons.pause_circle_filled
+                                                    : Icons.play_circle_filled,
+                                                color: AppColors.accentOrange,
+                                                size: 32,
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  val.isPlaying
+                                                      ? _videoPlayerController!.pause()
+                                                      : _videoPlayerController!.play();
+                                                });
+                                              },
+                                            ),
+                                            const SizedBox(width: 8),
+
+                                            // Time Display
+                                            Text(
+                                              '${_formatDuration(position)} / ${_formatDuration(duration)}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontFamily: 'monospace',
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            const Spacer(),
+
+                                            // Close MP4 Player
+                                            TextButton.icon(
+                                              icon: const Icon(Icons.close,
+                                                  color: Colors.white70, size: 16),
+                                              label: const Text('退出MP4演示',
+                                                  style: TextStyle(
+                                                      color: Colors.white70, fontSize: 12)),
+                                              onPressed: () {
+                                                _videoPlayerController?.pause();
+                                                _videoPlayerController?.dispose();
+                                                _videoPlayerController = null;
+                                                setState(() {
+                                                  _isVideoInitialized = false;
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: const [
-                                  _BoardToolIcon(Icons.edit, '电子画笔'),
-                                  _BoardToolIcon(Icons.crop_square, '板书批注'),
-                                  _BoardToolIcon(Icons.touch_app, '抢答点名'),
-                                  _BoardToolIcon(Icons.poll, '随堂测验'),
-                                  _BoardToolIcon(Icons.auto_graph, 'AI注意力打分'),
-                                  _BoardToolIcon(Icons.share, '屏幕共享'),
-                                ],
+                            )
+                          // Electronic Whiteboard Toolbar (When MP4 is not active)
+                          else
+                            Positioned(
+                              bottom: 16,
+                              left: 16,
+                              right: 16,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface.withOpacity(0.85),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: AppColors.cardBorder),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: const [
+                                    _BoardToolIcon(Icons.edit, '电子画笔'),
+                                    _BoardToolIcon(Icons.crop_square, '板书批注'),
+                                    _BoardToolIcon(Icons.touch_app, '抢答点名'),
+                                    _BoardToolIcon(Icons.poll, '随堂测验'),
+                                    _BoardToolIcon(Icons.auto_graph, 'AI注意力打分'),
+                                    _BoardToolIcon(Icons.share, '屏幕共享'),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -474,12 +734,12 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                                   ),
                                   child: Stack(
                                     children: [
-                                      // If student is focused & camera is on, show camera inside focus tile as well
-                                      if (isFocused && _isCameraInitialized && _cameraController != null)
+                                      // If student is focused & video is playing, overlay thumbnail
+                                      if (isFocused && _isVideoInitialized && _videoPlayerController != null)
                                         Positioned.fill(
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(8),
-                                            child: CameraPreview(_cameraController!),
+                                            child: VideoPlayer(_videoPlayerController!),
                                           ),
                                         )
                                       else
