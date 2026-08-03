@@ -118,66 +118,70 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
                           const SizedBox(height: 16),
                           Expanded(
                             child: SingleChildScrollView(
-                              child: DataTable(
-                                headingRowColor: MaterialStateProperty.all(AppColors.surface),
-                                dataRowColor: MaterialStateProperty.resolveWith(
-                                  (states) => AppColors.cardBg,
-                                ),
-                                columns: const [
-                                  DataColumn(label: Text('学号/姓名', style: TextStyle(color: AppColors.primary))),
-                                  DataColumn(label: Text('班级', style: TextStyle(color: AppColors.textSecondary))),
-                                  DataColumn(label: Text('德育(30%)', style: TextStyle(color: AppColors.textSecondary))),
-                                  DataColumn(label: Text('考勤(20%)', style: TextStyle(color: AppColors.textSecondary))),
-                                  DataColumn(label: Text('学业(50%)', style: TextStyle(color: AppColors.textSecondary))),
-                                  DataColumn(label: Text('加权 GPA', style: TextStyle(color: AppColors.accentOrange))),
-                                  DataColumn(label: Text('评级档案', style: TextStyle(color: AppColors.accentGreen))),
-                                ],
-                                rows: records.map((record) {
-                                  final isSelected = _selectedRecord?.id == record.id;
-                                  return DataRow(
-                                    selected: isSelected,
-                                    onSelectChanged: (_) {
-                                      setState(() => _selectedRecord = record);
-                                    },
-                                    cells: [
-                                      DataCell(
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 12,
-                                              backgroundColor: AppColors.primary.withOpacity(0.2),
-                                              child: const Icon(Icons.person, size: 14, color: AppColors.primary),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(record.name, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-                                                Text(record.studentId, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      DataCell(Text(record.className, style: const TextStyle(color: AppColors.textSecondary))),
-                                      DataCell(Text('${record.moralScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
-                                      DataCell(Text('${record.attendanceScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
-                                      DataCell(Text('${record.academicScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
-                                      DataCell(
-                                        Text(
-                                          record.totalGpa.toStringAsFixed(2),
-                                          style: const TextStyle(
-                                            color: AppColors.accentOrange,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
+                              scrollDirection: Axis.vertical,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: DataTable(
+                                  headingRowColor: MaterialStateProperty.all(AppColors.surface),
+                                  dataRowColor: MaterialStateProperty.resolveWith(
+                                    (states) => AppColors.cardBg,
+                                  ),
+                                  columns: const [
+                                    DataColumn(label: Text('学号/姓名', style: TextStyle(color: AppColors.primary))),
+                                    DataColumn(label: Text('班级', style: TextStyle(color: AppColors.textSecondary))),
+                                    DataColumn(label: Text('德育(30%)', style: TextStyle(color: AppColors.textSecondary))),
+                                    DataColumn(label: Text('考勤(20%)', style: TextStyle(color: AppColors.textSecondary))),
+                                    DataColumn(label: Text('学业(50%)', style: TextStyle(color: AppColors.textSecondary))),
+                                    DataColumn(label: Text('加权 GPA', style: TextStyle(color: AppColors.accentOrange))),
+                                    DataColumn(label: Text('评级档案', style: TextStyle(color: AppColors.accentGreen))),
+                                  ],
+                                  rows: records.map((record) {
+                                    final isSelected = _selectedRecord?.id == record.id;
+                                    return DataRow(
+                                      selected: isSelected,
+                                      onSelectChanged: (_) {
+                                        setState(() => _selectedRecord = record);
+                                      },
+                                      cells: [
+                                        DataCell(
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 12,
+                                                backgroundColor: AppColors.primary.withOpacity(0.2),
+                                                child: const Icon(Icons.person, size: 14, color: AppColors.primary),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(record.name, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+                                                  Text(record.studentId, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                      DataCell(TechBadge(label: record.level, color: AppColors.accentGreen)),
-                                    ],
-                                  );
-                                }).toList(),
+                                        DataCell(Text(record.className, style: const TextStyle(color: AppColors.textSecondary))),
+                                        DataCell(Text('${record.moralScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
+                                        DataCell(Text('${record.attendanceScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
+                                        DataCell(Text('${record.academicScore} 分', style: const TextStyle(color: AppColors.textPrimary))),
+                                        DataCell(
+                                          Text(
+                                            record.totalGpa.toStringAsFixed(2),
+                                            style: const TextStyle(
+                                              color: AppColors.accentOrange,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        DataCell(TechBadge(label: record.level, color: AppColors.accentGreen)),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
                           ),

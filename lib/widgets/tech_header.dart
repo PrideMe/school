@@ -52,34 +52,10 @@ class TechHeader extends StatelessWidget {
 
             const SizedBox(width: 10),
 
-            // Active Mode indicator (Flexible)
-            Flexible(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.cardBorder),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.bolt, color: AppColors.primary, size: 14),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        '模式: ${appState.activeTeachingMode}',
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            TechBadge(
+              label: '模式: ${appState.activeTeachingMode}',
+              color: AppColors.primary,
+              icon: Icons.bolt,
             ),
 
             const Spacer(),
