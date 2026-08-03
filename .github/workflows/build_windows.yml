@@ -18,7 +18,11 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
+        flutter-version: '3.24.5'
         channel: 'stable'
+
+    - name: Flutter Doctor
+      run: flutter doctor -v
 
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
@@ -27,20 +31,27 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release
+      run: flutter build windows --release --verbose
 
     - name: Compress Executable & Assets
       shell: powershell
       run: |
-        if (Test-Path "build\windows\x64\runner\Release") {
-          Write-Host "Compressing build\windows\x64\runner\Release..."
-          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "school-windows-x64.zip" -Force
-        } elseif (Test-Path "build\windows\runner\Release") {
-          Write-Host "Compressing build\windows\runner\Release..."
-          Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath "school-windows-x64.zip" -Force
-        } else {
-          Write-Host "Searching build directory..."
-          Get-ChildItem -Path "build" -Recurse
+        $found = $false
+        foreach ($path in @(
+          "build\windows\x64\runner\Release",
+          "build\windows\runner\Release",
+          "build\windows\arm64\runner\Release"
+        )) {
+          if (Test-Path $path) {
+            Write-Host "Found output at: $path"
+            Compress-Archive -Path "$path\*" -DestinationPath "school-windows-x64.zip" -Force
+            $found = $true
+            break
+          }
+        }
+        if (-not $found) {
+          Write-Host "=== Build directory listing ==="
+          Get-ChildItem -Path "build" -Recurse -Depth 5 | Select-Object FullName
           throw "Release output directory not found!"
         }
 
