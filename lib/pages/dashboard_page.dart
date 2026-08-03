@@ -347,7 +347,8 @@ class DashboardPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TechBadge(label: tag, color: color),
+              Flexible(child: TechBadge(label: tag, color: color)),
+              const SizedBox(width: 4),
               const Icon(Icons.play_circle_fill, color: AppColors.primary, size: 20),
             ],
           ),

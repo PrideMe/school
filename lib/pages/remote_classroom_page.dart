@@ -282,7 +282,7 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                       Text(
                         _isVideoInitialized
                             ? '当前播放文件: ${_loadedVideoName ?? "本地课程MP4"} • 支持实时进度拉拽与播放控制'
-                            : '多端音画实时同步传输 • AI 自动视频聚焦与本地 MP4 视频演示支持',
+                            : '多端音画实时同步传输 • 自动视频追焦与本地 MP4 视频演示支持',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
@@ -676,7 +676,7 @@ class _RemoteClassroomPageState extends State<RemoteClassroomPage> {
                                     _BoardToolIcon(Icons.crop_square, '板书批注'),
                                     _BoardToolIcon(Icons.touch_app, '抢答点名'),
                                     _BoardToolIcon(Icons.poll, '随堂测验'),
-                                    _BoardToolIcon(Icons.auto_graph, 'AI注意力打分'),
+                                    _BoardToolIcon(Icons.auto_graph, '课堂注意力统计'),
                                     _BoardToolIcon(Icons.share, '屏幕共享'),
                                   ],
                                 ),

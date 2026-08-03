@@ -21,7 +21,7 @@ class ClassroomEvaluationPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'AI 课堂评估与数据报告中心',
+                      '课堂教学质量评估与数据报告中心',
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 24,
@@ -89,7 +89,7 @@ class ClassroomEvaluationPage extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              TechBadge(label: 'AI 自动多维评价', color: AppColors.primary),
+                              TechBadge(label: '多维质规自动评估', color: AppColors.primary),
                             ],
                           ),
                           const SizedBox(height: 20),
@@ -110,11 +110,11 @@ class ClassroomEvaluationPage extends StatelessWidget {
                             ),
                             child: Row(
                               children: const [
-                                Icon(Icons.psychology, color: AppColors.primary, size: 20),
+                                Icon(Icons.analytics, color: AppColors.primary, size: 20),
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    'AI 智能建议：本节课互动氛围热烈，建议在后半程适当增加分组讨论环节，进一步提升听课效率。',
+                                    '教研专家组诊改建议：本节课互动氛围热烈，建议在后半程适当增加分组讨论环节，进一步提升听课效率。',
                                     style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 11,

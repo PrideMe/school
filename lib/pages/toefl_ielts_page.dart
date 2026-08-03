@@ -51,7 +51,7 @@ class _ToeflIeltsPageState extends State<ToeflIeltsPage> with SingleTickerProvid
                     ),
                     SizedBox(height: 4),
                     Text(
-                      '收录历年真题（口语、听力、阅读、写作）• AI 智能语音与写作实时批改引擎',
+                      '收录历年真题（口语、听力、阅读、写作）• 智能语音与写作自动批改引擎',
                       style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                     ),
                   ],

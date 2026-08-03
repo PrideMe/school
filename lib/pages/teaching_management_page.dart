@@ -153,8 +153,8 @@ class _TeachingManagementPageState extends State<TeachingManagementPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Text('校级托福/雅思模拟考试 - AI 在线监考大屏', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
-              TechBadge(label: 'AI 异常防作弊算法运行中', color: AppColors.accentGreen),
+              Text('校级托福/雅思模拟考试 - 实时监考控制台', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+              TechBadge(label: '考场行为监视与防作弊运行中', color: AppColors.accentGreen),
             ],
           ),
           const SizedBox(height: 20),
@@ -207,7 +207,7 @@ class _TeachingManagementPageState extends State<TeachingManagementPage> {
             child: ListView(
               children: const [
                 _HomeworkRow('高二物理第14周课后作业', '应交 142 人', '已交 140 人', '批改进度 100%'),
-                _HomeworkRow('托福口语Task 3 录音作业', '应交 98 人', '已交 98 人', 'AI 批改完成 100%'),
+                _HomeworkRow('托福口语Task 3 录音作业', '应交 98 人', '已交 98 人', '自动批改完成 100%'),
                 _HomeworkRow('名校微积分拓展专项练习', '应交 50 人', '已交 48 人', '批改进度 96%'),
               ],
             ),
