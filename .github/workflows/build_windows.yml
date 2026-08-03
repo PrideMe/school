@@ -27,16 +27,8 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      shell: powershell
-      run: |
-        $ErrorActionPreference = "Continue"
-        if (Test-Path env:PSNativeCommandUseErrorActionPreference) {
-          $PSNativeCommandUseErrorActionPreference = $false
-        }
-        flutter build windows --release
-        if ($LASTEXITCODE -ne 0) {
-          throw "Flutter build windows exited with code $LASTEXITCODE"
-        }
+      shell: cmd
+      run: flutter build windows --release --verbose
 
     - name: Compress Executable & Assets
       shell: powershell
