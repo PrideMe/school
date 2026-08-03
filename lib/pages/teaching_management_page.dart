@@ -131,8 +131,11 @@ class _TeachingManagementPageState extends State<TeachingManagementPage> {
               height: 28,
               isSecondary: true,
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('正在调取《$room》的督导打分卡...')),
+                showTechNoticeDialog(
+                  context,
+                  title: '发起督导听评课评估',
+                  message: '已实时调取《$room》的督导评课打分卡，包含 6 维度教学评价指标与语音抓拍！',
+                  icon: Icons.rate_review,
                 );
               },
             ),

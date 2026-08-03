@@ -47,6 +47,20 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.surface,
+        contentTextStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+        elevation: 12,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+      ),
       useMaterial3: true,
     );
   }

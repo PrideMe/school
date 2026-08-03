@@ -114,11 +114,7 @@ class _TeachingResourcesPageState extends State<TeachingResourcesPage> {
                 TechButton(
                   label: '+ 上传/建设计划资源',
                   icon: Icons.cloud_upload,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('打开资源上传与归档面板')),
-                    );
-                  },
+                  onPressed: () => _showUploadResourceDialog(context),
                 ),
               ],
             ),
@@ -241,8 +237,11 @@ class _TeachingResourcesPageState extends State<TeachingResourcesPage> {
                               height: 30,
                               isSecondary: true,
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('已成功加载《${res.title}》资源库！')),
+                                showTechNoticeDialog(
+                                  context,
+                                  title: '资源资产调阅',
+                                  message: '已成功加载《${res.title}》数字资产，并完成全网分布节点同步与离线高帧率缓存！',
+                                  icon: Icons.cloud_done,
                                 );
                               },
                             ),
@@ -257,6 +256,86 @@ class _TeachingResourcesPageState extends State<TeachingResourcesPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showUploadResourceDialog(BuildContext context) {
+    final titleCtrl = TextEditingController();
+    final authorCtrl = TextEditingController();
+    String category = '专递课堂';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return TechDialog(
+              title: '校本数字教学资源归档与建设',
+              icon: Icons.cloud_upload,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: titleCtrl,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
+                      labelText: '资源资产标题',
+                      labelStyle: TextStyle(color: AppColors.textSecondary),
+                      prefixIcon: Icon(Icons.title, color: AppColors.primary, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: authorCtrl,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
+                      labelText: '主讲 / 归档教师',
+                      labelStyle: TextStyle(color: AppColors.textSecondary),
+                      prefixIcon: Icon(Icons.person, color: AppColors.primary, size: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: category,
+                    dropdownColor: AppColors.surface,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                    decoration: const InputDecoration(
+                      labelText: '资源类别',
+                      labelStyle: TextStyle(color: AppColors.textSecondary),
+                      prefixIcon: Icon(Icons.category, color: AppColors.primary, size: 20),
+                    ),
+                    items: ['专递课堂', '名师课堂', '名校课堂', '校本微课', '托福/雅思真题', '教研磨课']
+                        .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) setDialogState(() => category = val);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('取消', style: TextStyle(color: AppColors.textMuted)),
+                ),
+                const SizedBox(width: 8),
+                TechButton(
+                  label: '确认上传并归档',
+                  onPressed: () {
+                    Navigator.pop(context);
+                    showTechNoticeDialog(
+                      context,
+                      title: '资源上传归档成功',
+                      message: '资源《${titleCtrl.text.isNotEmpty ? titleCtrl.text : "新建校本教学资源"}》已成功加密归档至智慧教育云端节点！',
+                      icon: Icons.cloud_done,
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

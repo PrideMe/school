@@ -40,8 +40,11 @@ class ClassroomEvaluationPage extends StatelessWidget {
                   label: '导出完整 PDF 评估档案',
                   icon: Icons.picture_as_pdf,
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('已成功生成并导出《高二物理远程互动课堂评估报告.pdf》')),
+                    showTechNoticeDialog(
+                      context,
+                      title: 'PDF 档案导出成功',
+                      message: '已成功生成并导出《高二物理远程互动课堂评估报告.pdf》至本地归档目录！',
+                      icon: Icons.picture_as_pdf,
                     );
                   },
                 ),

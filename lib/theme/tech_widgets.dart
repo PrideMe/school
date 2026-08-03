@@ -480,3 +480,38 @@ class TechDialog extends StatelessWidget {
     );
   }
 }
+
+void showTechNoticeDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  IconData icon = Icons.check_circle_outline,
+}) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return TechDialog(
+        title: title,
+        icon: icon,
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
+        ),
+        actions: [
+          TechButton(
+            label: '确定',
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      );
+    },
+  );
+}
