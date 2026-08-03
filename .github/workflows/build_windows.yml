@@ -15,47 +15,19 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up MSVC Developer Command Prompt
-      uses: ilammy/msvc-dev-cmd@v1
-
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.19.6'
         channel: 'stable'
 
     - name: Enable Windows Desktop Support
-      shell: cmd
-      run: call flutter config --enable-windows-desktop
-
-    - name: Clean Flutter Build Cache
-      shell: cmd
-      run: call flutter clean
+      run: flutter config --enable-windows-desktop
 
     - name: Get Flutter Dependencies
-      shell: cmd
-      run: call flutter pub get
+      run: flutter pub get
 
     - name: Build Windows Release Executable
-      shell: cmd
-      run: call flutter build windows --release --verbose > build_log.txt 2>&1
-
-    - name: Print Full Build Log
-      if: always()
-      shell: powershell
-      run: |
-        if (Test-Path build_log.txt) {
-          Write-Host "========== BEGIN BUILD LOG =========="
-          Get-Content build_log.txt
-          Write-Host "========== END BUILD LOG =========="
-        }
-
-    - name: Upload Diagnostic Build Log
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log
-        path: build_log.txt
+      run: flutter build windows --release
 
     - name: Compress Executable & Assets
       shell: powershell
