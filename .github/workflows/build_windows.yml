@@ -26,11 +26,14 @@ jobs:
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
 
+    - name: Clean Flutter Cache
+      run: flutter clean
+
     - name: Get Flutter Dependencies
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release
+      run: flutter build windows --release -v
 
     - name: Compress Executable & Assets
       shell: powershell
