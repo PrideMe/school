@@ -34,27 +34,12 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Executable
-      shell: powershell
-      run: |
-        $p = Start-Process -FilePath "flutter.bat" -ArgumentList "build","windows","--release","-v" -NoNewWindow -PassThru -Wait -RedirectStandardOutput "build_log_full.txt" -RedirectStandardError "build_err_full.txt"
-        if (Test-Path "build_err_full.txt") {
-            Get-Content "build_err_full.txt" | Out-File -FilePath "build_log_full.txt" -Append -Encoding utf8
-        }
-        Write-Host "==================== FULL BUILD LOG OUTPUT ===================="
-        Get-Content "build_log_full.txt"
-        if ($p.ExitCode -ne 0) {
-            exit $p.ExitCode
-        }
-
-    - name: Upload Full Diagnostic Log
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-log-full
-        path: build_log_full.txt
+      run: flutter build windows --release
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: school-windows-exe
-        path: build/windows/x64/runner/Release/
+        path: |
+          build/windows/bundle/
+          build/windows/x64/runner/Release/
