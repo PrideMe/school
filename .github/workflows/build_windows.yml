@@ -28,14 +28,14 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Executable
-      shell: powershell
+      shell: cmd
       run: |
-        flutter build windows --release -v 2>&1 | Out-File -FilePath build.log -Encoding utf8
-        if ($LASTEXITCODE -ne 0) {
-          Write-Host "================== FULL BUILD LOG (32 LINES) =================="
-          Get-Content build.log
-          exit $LASTEXITCODE
-        }
+        call flutter build windows --release --verbose > build.log 2>&1
+        if %ERRORLEVEL% NEQ 0 (
+          echo ==================== FULL BUILD LOG ====================
+          type build.log
+          exit /b %ERRORLEVEL%
+        )
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
