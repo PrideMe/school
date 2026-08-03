@@ -27,19 +27,13 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      run: flutter build windows --release
-
-    - name: Print All Log Files on Failure
-      if: failure()
       shell: powershell
       run: |
-        Get-ChildItem -Path build -Recurse -Include *.log,*.txt | ForEach-Object {
-          Write-Host "=========================================="
-          Write-Host "=== FILE: $($_.FullName) ==="
-          Write-Host "=========================================="
-          Get-Content $_.FullName -Head 50
-          Write-Host "--- TAIL ---"
-          Get-Content $_.FullName -Tail 100
+        flutter build windows --release 2>&1 | Tee-Object -FilePath build_full_output.log
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "================== BUILD LOG TAIL =================="
+          Get-Content build_full_output.log -Tail 150
+          exit $LASTEXITCODE
         }
 
     - name: Upload Build Log Artifacts on Failure
@@ -47,9 +41,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: build-failure-logs
-        path: |
-          build/**/*.log
-          build/**/*.txt
+        path: build_full_output.log
 
     - name: Compress Executable & Assets
       shell: powershell
