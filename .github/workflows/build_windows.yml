@@ -32,18 +32,8 @@ jobs:
       run: |
         flutter build windows --release -v 2>&1 | Out-File -FilePath build.log -Encoding utf8
         if ($LASTEXITCODE -ne 0) {
-          Write-Host "================== SEARCHING BUILD LOG FOR ERRORS =================="
-          $matches = Select-String -Path build.log -Pattern "error","failed","fatal","CMake Error","MSB" -Context 2,2
-          if ($matches) {
-            foreach ($m in $matches) {
-              Write-Host "--- MATCH FOUND ---"
-              $m.Context.PreContext | ForEach-Object { Write-Host "  " $_ }
-              Write-Host ">> " $m.Line
-              $m.Context.PostContext | ForEach-Object { Write-Host "  " $_ }
-            }
-          } else {
-            Get-Content build.log -Tail 100
-          }
+          Write-Host "================== FULL BUILD LOG (32 LINES) =================="
+          Get-Content build.log
           exit $LASTEXITCODE
         }
 
