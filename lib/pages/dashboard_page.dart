@@ -21,38 +21,45 @@ class DashboardPage extends StatelessWidget {
             // Page Header Banner
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Text(
-                          '智慧校园驾驶舱看板',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.8,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Flexible(
+                            child: Text(
+                              '智慧校园驾驶舱看板',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        TechBadge(
-                          label: '视角: ${appState.currentRole.title}',
-                          color: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '实时监控三个课堂、远程互动授课、GPA档案与全校教学资源调度状态',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
+                          const SizedBox(width: 12),
+                          TechBadge(
+                            label: '视角: ${appState.currentRole.title}',
+                            color: AppColors.primary,
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      const Text(
+                        '实时监控三个课堂、远程互动授课、GPA档案与全校教学资源调度状态',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 12),
                 TechButton(
                   label: '快捷发起互动课堂',
                   icon: Icons.add_to_queue,
