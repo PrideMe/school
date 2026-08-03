@@ -28,6 +28,10 @@ jobs:
       shell: cmd
       run: call flutter config --enable-windows-desktop
 
+    - name: Flutter Doctor Diagnostic
+      shell: cmd
+      run: call flutter doctor -v
+
     - name: Clean Flutter Build Cache
       shell: cmd
       run: call flutter clean
@@ -38,7 +42,16 @@ jobs:
 
     - name: Build Windows Release Executable
       shell: cmd
-      run: call flutter build windows --release
+      run: call flutter build windows --release --verbose > build_log.txt 2>&1
+
+    - name: Print Build Error Log
+      if: failure()
+      shell: powershell
+      run: |
+        if (Test-Path build_log.txt) {
+          Write-Host "========== BUILD ERROR LOG (LAST 150 LINES) =========="
+          Get-Content build_log.txt -Tail 150
+        }
 
     - name: Compress Executable & Assets
       shell: powershell
