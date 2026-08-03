@@ -25,7 +25,7 @@ class TechHeader extends StatelessWidget {
       },
       child: Container(
         height: 64,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: const BoxDecoration(
           color: AppColors.surface,
           border: Border(
@@ -34,45 +34,51 @@ class TechHeader extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Drag handle / Live status badge
+            // Left badges
             if (appState.isRecording) ...[
               const TechBadge(
-                label: 'REC 录播中',
+                label: 'REC',
                 color: AppColors.accentRed,
                 icon: Icons.fiber_manual_record,
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 8),
             ],
 
             const TechBadge(
-              label: '5G 远程音画传输',
+              label: '5G 高清音画',
               color: AppColors.accentGreen,
               icon: Icons.wifi_tethering,
             ),
 
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
 
-            // Active Mode indicator
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.cardBg,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.cardBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.bolt, color: AppColors.primary, size: 14),
-                  const SizedBox(width: 4),
-                  Text(
-                    '当前应用模式: ${appState.activeTeachingMode}',
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+            // Active Mode indicator (Flexible)
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.cardBg,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.bolt, color: AppColors.primary, size: 14),
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        '模式: ${appState.activeTeachingMode}',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 

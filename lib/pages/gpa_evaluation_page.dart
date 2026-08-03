@@ -62,17 +62,26 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
             // Top Weight Formula Indicator Card
             TechCard(
               bgColor: AppColors.surface,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
-                  _WeightChip('德育评估 (Moral)', '30%', AppColors.primary, Icons.workspace_premium),
-                  Icon(Icons.add, color: AppColors.textMuted),
-                  _WeightChip('考勤纪律 (Attendance)', '20%', AppColors.accentGreen, Icons.event_available),
-                  Icon(Icons.add, color: AppColors.textMuted),
-                  _WeightChip('学业成绩 (Academic)', '50%', AppColors.secondary, Icons.menu_book),
-                  Icon(Icons.drag_handle, color: AppColors.textMuted),
-                  _WeightChip('系统加权 GPA 档案', '100%', AppColors.accentOrange, Icons.stars),
-                ],
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const [
+                    _WeightChip('德育评估 (Moral)', '30%', AppColors.primary, Icons.workspace_premium),
+                    SizedBox(width: 8),
+                    Icon(Icons.add, color: AppColors.textMuted),
+                    SizedBox(width: 8),
+                    _WeightChip('考勤纪律 (Attendance)', '20%', AppColors.accentGreen, Icons.event_available),
+                    SizedBox(width: 8),
+                    Icon(Icons.add, color: AppColors.textMuted),
+                    SizedBox(width: 8),
+                    _WeightChip('学业成绩 (Academic)', '50%', AppColors.secondary, Icons.menu_book),
+                    SizedBox(width: 8),
+                    Icon(Icons.drag_handle, color: AppColors.textMuted),
+                    SizedBox(width: 8),
+                    _WeightChip('系统加权 GPA 档案', '100%', AppColors.accentOrange, Icons.stars),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),

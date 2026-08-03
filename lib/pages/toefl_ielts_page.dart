@@ -340,14 +340,17 @@ class _ToeflIeltsPageState extends State<ToeflIeltsPage> with SingleTickerProvid
             style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontStyle: FontStyle.italic),
           ),
           const Spacer(),
-          Row(
-            children: const [
-              TechBadge(label: 'Task Response: 8.5', color: AppColors.primary),
-              SizedBox(width: 8),
-              TechBadge(label: 'Coherence & Cohesion: 8.0', color: AppColors.secondary),
-              SizedBox(width: 8),
-              TechBadge(label: 'Lexical Resource: 8.5', color: AppColors.accentOrange),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: const [
+                TechBadge(label: 'Task Response: 8.5', color: AppColors.primary),
+                SizedBox(width: 8),
+                TechBadge(label: 'Coherence & Cohesion: 8.0', color: AppColors.secondary),
+                SizedBox(width: 8),
+                TechBadge(label: 'Lexical Resource: 8.5', color: AppColors.accentOrange),
+              ],
+            ),
           ),
         ],
       ),
