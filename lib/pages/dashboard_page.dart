@@ -122,18 +122,23 @@ class DashboardPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
-                            Text(
-                              '实时课堂互动热度与参与度分布',
-                              style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                '实时课堂互动热度与参与度分布',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
+                            SizedBox(width: 8),
                             TechBadge(label: '实时算法计算中', color: AppColors.primary),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         SizedBox(
                           height: 200,
                           child: CustomPaint(
@@ -142,13 +147,18 @@ class DashboardPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: const [
-                            _LegendItem(label: '专递课堂参与度', color: AppColors.primary),
-                            _LegendItem(label: '名师课堂互动率', color: AppColors.secondary),
-                            _LegendItem(label: '名校资源播放数', color: AppColors.accentGreen),
-                          ],
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: const [
+                              _LegendItem(label: '专递课堂参与度', color: AppColors.primary),
+                              SizedBox(width: 12),
+                              _LegendItem(label: '名师课堂互动率', color: AppColors.secondary),
+                              SizedBox(width: 12),
+                              _LegendItem(label: '名校资源播放数', color: AppColors.accentGreen),
+                            ],
+                          ),
                         )
                       ],
                     ),
@@ -165,12 +175,16 @@ class DashboardPage extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
-                            Text(
-                              '全校综合教学评估',
-                              style: TextStyle(
-                                color: AppColors.textPrimary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Text(
+                                '全校综合教学评估',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             Icon(Icons.pie_chart, color: AppColors.primary, size: 18),
