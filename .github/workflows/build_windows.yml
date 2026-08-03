@@ -21,9 +21,6 @@ jobs:
         channel: 'stable'
         cache: true
 
-    - name: Flutter Doctor
-      run: flutter doctor -v
-
     - name: Enable Windows Desktop Support
       run: flutter config --enable-windows-desktop
 
@@ -31,8 +28,24 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Executable
-      shell: cmd
-      run: flutter build windows --release --verbose > build.log 2>&1 || (type build.log && exit /b 1)
+      shell: powershell
+      run: |
+        flutter build windows --release -v 2>&1 | Out-File -FilePath build.log -Encoding utf8
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "================== SEARCHING BUILD LOG FOR ERRORS =================="
+          $matches = Select-String -Path build.log -Pattern "error","failed","fatal","CMake Error","MSB" -Context 2,2
+          if ($matches) {
+            foreach ($m in $matches) {
+              Write-Host "--- MATCH FOUND ---"
+              $m.Context.PreContext | ForEach-Object { Write-Host "  " $_ }
+              Write-Host ">> " $m.Line
+              $m.Context.PostContext | ForEach-Object { Write-Host "  " $_ }
+            }
+          } else {
+            Get-Content build.log -Tail 100
+          }
+          exit $LASTEXITCODE
+        }
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
