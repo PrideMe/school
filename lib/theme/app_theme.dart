@@ -35,9 +35,16 @@ class AppTheme {
       ),
       dialogTheme: DialogTheme(
         backgroundColor: AppColors.surface,
+        alignment: Alignment.center,
+        elevation: 24,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.primary, width: 1),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        titleTextStyle: const TextStyle(
+          color: AppColors.textPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
       useMaterial3: true,

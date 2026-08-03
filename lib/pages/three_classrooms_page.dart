@@ -371,8 +371,9 @@ class _ThreeClassroomsPageState extends State<ThreeClassroomsPage>
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('排定“三个课堂”新课程', style: TextStyle(color: AppColors.textPrimary)),
+        return TechDialog(
+          title: '排定“三个课堂”新课程日程',
+          icon: Icons.video_call,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: const [
@@ -380,6 +381,7 @@ class _ThreeClassroomsPageState extends State<ThreeClassroomsPage>
                 decoration: InputDecoration(
                   labelText: '课程名称',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.class_, color: AppColors.primary, size: 20),
                 ),
               ),
               SizedBox(height: 12),
@@ -387,13 +389,15 @@ class _ThreeClassroomsPageState extends State<ThreeClassroomsPage>
                 decoration: InputDecoration(
                   labelText: '主讲名师',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.person, color: AppColors.primary, size: 20),
                 ),
               ),
               SizedBox(height: 12),
               TextField(
                 decoration: InputDecoration(
-                  labelText: '同步连线教室/学校',
+                  labelText: '同步连线教室 / 联培学校',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.school, color: AppColors.primary, size: 20),
                 ),
               ),
             ],
@@ -401,14 +405,15 @@ class _ThreeClassroomsPageState extends State<ThreeClassroomsPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: const Text('取消', style: TextStyle(color: AppColors.textMuted)),
             ),
+            const SizedBox(width: 8),
             TechButton(
               label: '立即创建并广播',
               onPressed: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已成功创建新三课堂日程！')),
+                  const SnackBar(content: Text('已成功创建新“三个课堂”日程并同步多端广播！')),
                 );
               },
             ),

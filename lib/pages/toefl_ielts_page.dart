@@ -380,11 +380,19 @@ class _ToeflIeltsPageState extends State<ToeflIeltsPage> with SingleTickerProvid
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('启动全校/年级托福模拟考试', style: TextStyle(color: AppColors.textPrimary)),
-          content: const Text('系统将自动发放全真考试试卷，并监控考生答题行为及实时智能批改。'),
+        return TechDialog(
+          title: '启动全校/年级托福模拟考试',
+          icon: Icons.quiz,
+          content: const Text(
+            '系统将自动发放全真考试试卷，并监控考生答题行为及实时智能批改。是否确认立即发布？',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消', style: TextStyle(color: AppColors.textMuted)),
+            ),
+            const SizedBox(width: 8),
             TechButton(
               label: '开始发布模拟考试',
               onPressed: () {

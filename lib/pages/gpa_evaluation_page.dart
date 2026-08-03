@@ -295,8 +295,9 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('录入/评分：${record.name} (${record.className})', style: const TextStyle(color: AppColors.textPrimary)),
+        return TechDialog(
+          title: '综合评价录入: ${record.name} (${record.className})',
+          icon: Icons.grade,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -311,6 +312,7 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
                 decoration: const InputDecoration(
                   labelText: '德育评分 (权重 30%)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.favorite, color: AppColors.accentRed, size: 18),
                 ),
               ),
               const SizedBox(height: 10),
@@ -320,6 +322,7 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
                 decoration: const InputDecoration(
                   labelText: '考勤纪律 (权重 20%)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.access_time, color: AppColors.accentGreen, size: 18),
                 ),
               ),
               const SizedBox(height: 10),
@@ -329,6 +332,7 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
                 decoration: const InputDecoration(
                   labelText: '学业成绩 (权重 50%)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
+                  prefixIcon: Icon(Icons.menu_book, color: AppColors.primary, size: 18),
                 ),
               ),
             ],
@@ -336,8 +340,9 @@ class _GpaEvaluationPageState extends State<GpaEvaluationPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消'),
+              child: const Text('取消', style: TextStyle(color: AppColors.textMuted)),
             ),
+            const SizedBox(width: 8),
             TechButton(
               label: '保存并重新计算 GPA',
               onPressed: () {

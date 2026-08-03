@@ -403,3 +403,80 @@ class _RadarChartPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+class TechDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget>? actions;
+  final IconData? icon;
+
+  const TechDialog({
+    super.key,
+    required this.title,
+    required this.content,
+    this.actions,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      alignment: Alignment.center,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 480),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.35),
+              blurRadius: 28,
+              spreadRadius: 2,
+            )
+          ],
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Dialog Header Title (Centered)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: AppColors.primary, size: 22),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            const Divider(color: AppColors.cardBorder, height: 1),
+            const SizedBox(height: 18),
+
+            // Dialog Main Content Area
+            Flexible(child: SingleChildScrollView(child: content)),
+
+            if (actions != null && actions!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actions!,
+              ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+}
