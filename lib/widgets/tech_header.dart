@@ -32,181 +32,197 @@ class TechHeader extends StatelessWidget {
             bottom: BorderSide(color: AppColors.cardBorder, width: 1),
           ),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Left badges
-              if (appState.isRecording) ...[
-                const TechBadge(
-                  label: 'REC',
-                  color: AppColors.accentRed,
-                  icon: Icons.fiber_manual_record,
-                ),
-                const SizedBox(width: 8),
-              ],
-
-              const TechBadge(
-                label: '5G 高清音画',
-                color: AppColors.accentGreen,
-                icon: Icons.wifi_tethering,
-              ),
-
-              const SizedBox(width: 10),
-
-              TechBadge(
-                label: '模式: ${appState.activeTeachingMode}',
-                color: AppColors.primary,
-                icon: Icons.bolt,
-              ),
-
-              const SizedBox(width: 24),
-
-              // System clock display
-              StreamBuilder<DateTime>(
-                stream: Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
-                builder: (context, snapshot) {
-                  final now = snapshot.data ?? DateTime.now();
-                  final dateStr =
-                      '${now.year}-${_twoDigits(now.month)}-${_twoDigits(now.day)}';
-                  final timeStr =
-                      '${_twoDigits(now.hour)}:${_twoDigits(now.minute)}:${_twoDigits(now.second)}';
-
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        timeStr,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontFamily: 'monospace',
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        dateStr,
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-
-              const SizedBox(width: 16),
-              const VerticalDivider(color: AppColors.cardBorder, indent: 16, endIndent: 16),
-              const SizedBox(width: 12),
-
-              // Role Quick Switcher Avatar Button
-              PopupMenuButton<UserRole>(
-                initialValue: currentRole,
-                tooltip: '切换身份视角',
-                onSelected: (role) => appState.switchRole(role),
-                color: AppColors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppColors.cardBorder),
-                ),
-                itemBuilder: (context) {
-                  return UserRole.values.map((role) {
-                    return PopupMenuItem<UserRole>(
-                      value: role,
-                      child: Row(
-                        children: [
-                          Icon(
-                            role == currentRole
-                                ? Icons.radio_button_checked
-                                : Icons.radio_button_unchecked,
-                            color: role == currentRole
-                                ? AppColors.primary
-                                : AppColors.textMuted,
-                            size: 16,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Left badges
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (appState.isRecording) ...[
+                          const TechBadge(
+                            label: 'REC 录播中',
+                            color: AppColors.accentRed,
+                            icon: Icons.fiber_manual_record,
                           ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                          const SizedBox(width: 8),
+                        ],
+
+                        const TechBadge(
+                          label: '5G 高清音画',
+                          color: AppColors.accentGreen,
+                          icon: Icons.wifi_tethering,
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        TechBadge(
+                          label: '模式: ${appState.activeTeachingMode}',
+                          color: AppColors.primary,
+                          icon: Icons.bolt,
+                        ),
+                      ],
+                    ),
+
+                    // Right status & controls
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // System clock display
+                        StreamBuilder<DateTime>(
+                          stream: Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
+                          builder: (context, snapshot) {
+                            final now = snapshot.data ?? DateTime.now();
+                            final dateStr =
+                                '${now.year}-${_twoDigits(now.month)}-${_twoDigits(now.day)}';
+                            final timeStr =
+                                '${_twoDigits(now.hour)}:${_twoDigits(now.minute)}:${_twoDigits(now.second)}';
+
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  timeStr,
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontFamily: 'monospace',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  dateStr,
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+
+                        const SizedBox(width: 16),
+                        const VerticalDivider(color: AppColors.cardBorder, indent: 16, endIndent: 16),
+                        const SizedBox(width: 12),
+
+                        // Role Quick Switcher Avatar Button
+                        PopupMenuButton<UserRole>(
+                          initialValue: currentRole,
+                          tooltip: '切换身份视角',
+                          onSelected: (role) => appState.switchRole(role),
+                          color: AppColors.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: AppColors.cardBorder),
+                          ),
+                          itemBuilder: (context) {
+                            return UserRole.values.map((role) {
+                              return PopupMenuItem<UserRole>(
+                                value: role,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      role == currentRole
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_unchecked,
+                                      color: role == currentRole
+                                          ? AppColors.primary
+                                          : AppColors.textMuted,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          role.title,
+                                          style: TextStyle(
+                                            color: role == currentRole
+                                                ? AppColors.primary
+                                                : AppColors.textPrimary,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        Text(
+                                          role.description,
+                                          style: const TextStyle(
+                                            color: AppColors.textMuted,
+                                            fontSize: 10,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList();
+                          },
+                          child: Row(
                             children: [
-                              Text(
-                                role.title,
-                                style: TextStyle(
-                                  color: role == currentRole
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: AppColors.primary.withOpacity(0.2),
+                                child: const Icon(
+                                  Icons.account_circle,
+                                  color: AppColors.primary,
+                                  size: 22,
                                 ),
                               ),
-                              Text(
-                                role.description,
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 10,
-                                ),
+                              const SizedBox(width: 8),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    currentRole.title,
+                                    style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Row(
+                                    children: const [
+                                      Text(
+                                        '点击切换',
+                                        style: TextStyle(
+                                          color: AppColors.textMuted,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                      Icon(Icons.arrow_drop_down, color: AppColors.primary, size: 14),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                        ),
+
+                        // Custom Desktop Window Control Buttons (Minimize, Maximize, Close)
+                        if (isDesktop) ...[
+                          const SizedBox(width: 16),
+                          const VerticalDivider(color: AppColors.cardBorder, indent: 16, endIndent: 16),
+                          const SizedBox(width: 8),
+                          const CustomWindowCaptionButtons(),
                         ],
-                      ),
-                    );
-                  }).toList();
-                },
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppColors.primary.withOpacity(0.2),
-                      child: const Icon(
-                        Icons.account_circle,
-                        color: AppColors.primary,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          currentRole.title,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: const [
-                            Text(
-                              '点击切换',
-                              style: TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 10,
-                              ),
-                            ),
-                            Icon(Icons.arrow_drop_down, color: AppColors.primary, size: 14),
-                          ],
-                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-
-              // Custom Desktop Window Control Buttons (Minimize, Maximize, Close)
-              if (isDesktop) ...[
-                const SizedBox(width: 16),
-                const VerticalDivider(color: AppColors.cardBorder, indent: 16, endIndent: 16),
-                const SizedBox(width: 8),
-                const CustomWindowCaptionButtons(),
-              ],
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
