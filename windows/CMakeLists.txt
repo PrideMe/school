@@ -65,6 +65,8 @@ include(flutter/generated_plugins.cmake)
 # Copy the Flutter DLL and data files to the output directory.
 # CMAKE_INSTALL_PREFIX is the build output directory.
 set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
+set(INSTALL_BUNDLE_DATA_DIR "${BUILD_BUNDLE_DIR}/data")
+set(INSTALL_BUNDLE_LIB_DIR "${BUILD_BUNDLE_DIR}")
 set(PROJECT_BUILD_DIR "${CMAKE_CURRENT_BUILD_DIR}/")
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 
