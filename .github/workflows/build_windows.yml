@@ -28,15 +28,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Release Executable
-      shell: cmd
-      run: flutter build windows --release --verbose > build_verbose.log 2>&1
-
-    - name: Display Build Failure Log
-      if: failure()
-      shell: powershell
-      run: |
-        Write-Host "=== LAST 200 LINES OF BUILD VERBOSE LOG ==="
-        Get-Content build_verbose.log -Tail 200
+      run: flutter build windows --release
 
     - name: Compress Executable & Assets
       shell: powershell
@@ -62,10 +54,3 @@ jobs:
       with:
         name: school-windows-exe
         path: school-windows-x64.zip
-
-    - name: Upload Diagnostic Logs on Failure
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-diagnostic-log
-        path: build_verbose.log
