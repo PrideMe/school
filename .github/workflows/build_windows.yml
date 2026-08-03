@@ -29,6 +29,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Windows Executable
+      shell: cmd
       run: flutter build windows --release --verbose
 
     - name: Upload Windows Build Artifact
