@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
-typedef CardThemeData = CardTheme;
-typedef DialogThemeData = DialogTheme;
-
 class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
       primaryColor: AppColors.primary,
+      cardColor: AppColors.cardBg,
+      dialogBackgroundColor: AppColors.surface,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         secondary: AppColors.secondary,
@@ -18,33 +17,11 @@ class AppTheme {
         error: AppColors.accentRed,
       ),
       fontFamily: 'PingFang SC',
-      cardTheme: CardThemeData(
-        color: AppColors.cardBg,
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.cardBorder, width: 1),
-        ),
-      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.surface,
-        alignment: Alignment.center,
-        elevation: 24,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
-        titleTextStyle: const TextStyle(
           color: AppColors.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.bold,
