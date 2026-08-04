@@ -342,16 +342,17 @@ class DashboardPage extends StatelessWidget {
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Flexible(child: TechBadge(label: tag, color: color)),
               const SizedBox(width: 4),
-              const Icon(Icons.play_circle_fill, color: AppColors.primary, size: 20),
+              const Icon(Icons.play_circle_fill, color: AppColors.primary, size: 18),
             ],
           ),
+          const Spacer(),
           Text(
             title,
             maxLines: 1,
@@ -359,11 +360,14 @@ class DashboardPage extends StatelessWidget {
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
-              fontSize: 14,
+              fontSize: 13,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             teacher,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 11,
