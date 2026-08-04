@@ -32,6 +32,44 @@ jobs:
       shell: cmd
       run: flutter build windows --release --verbose
 
+    - name: Assemble Release Bundle Directory
+      shell: powershell
+      run: |
+        $targetDir = "build/windows/x64/runner/Release"
+        $dataDir = "$targetDir/data"
+        if (-not (Test-Path $dataDir)) { New-Item -ItemType Directory -Force -Path $dataDir }
+
+        # Copy flutter_windows.dll
+        $dll = Get-ChildItem -Path . -Filter "flutter_windows.dll" -Recurse | Select-Object -First 1
+        if ($dll) {
+          Copy-Item -Path $dll.FullName -Destination $targetDir -Force
+          Write-Host "Copied flutter_windows.dll from $($dll.FullName)"
+        }
+
+        # Copy icudtl.dat
+        $icu = Get-ChildItem -Path . -Filter "icudtl.dat" -Recurse | Select-Object -First 1
+        if ($icu) {
+          Copy-Item -Path $icu.FullName -Destination $dataDir -Force
+          Write-Host "Copied icudtl.dat from $($icu.FullName)"
+        }
+
+        # Copy app.so
+        $so = Get-ChildItem -Path . -Filter "app.so" -Recurse | Select-Object -First 1
+        if ($so) {
+          Copy-Item -Path $so.FullName -Destination $dataDir -Force
+          Write-Host "Copied app.so from $($so.FullName)"
+        }
+
+        # Copy flutter_assets
+        $assets = Get-ChildItem -Path build -Filter "flutter_assets" -Recurse -Directory | Where-Object { $_.FullName -notlike "*runner\Release*" } | Select-Object -First 1
+        if ($assets -and -not (Test-Path "$dataDir/flutter_assets")) {
+          Copy-Item -Path $assets.FullName -Destination $dataDir -Recurse -Force
+          Write-Host "Copied flutter_assets from $($assets.FullName)"
+        }
+
+        Write-Host "=== FINAL RELEASE BUNDLE CONTENTS ==="
+        Get-ChildItem -Recurse $targetDir
+
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
       with:
