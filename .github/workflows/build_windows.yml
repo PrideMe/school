@@ -32,8 +32,33 @@ jobs:
       shell: cmd
       run: flutter build windows --release --verbose
 
+    - name: Assemble Windows Bundle
+      shell: powershell
+      run: |
+        $releaseDir = "build/windows/x64/runner/Release"
+        $dataDir = "$releaseDir/data"
+        New-Item -ItemType Directory -Force -Path $dataDir
+
+        # Copy flutter_windows.dll
+        Get-ChildItem -Path . -Filter "flutter_windows.dll" -Recurse | ForEach-Object {
+          Copy-Item -Path $_.FullName -Destination $releaseDir -Force
+        }
+
+        # Copy icudtl.dat
+        Get-ChildItem -Path . -Filter "icudtl.dat" -Recurse | ForEach-Object {
+          Copy-Item -Path $_.FullName -Destination $dataDir -Force
+        }
+
+        # Copy flutter_assets
+        Get-ChildItem -Path build -Filter "flutter_assets" -Recurse -Directory | ForEach-Object {
+          Copy-Item -Path $_.FullName -Destination $dataDir -Recurse -Force
+        }
+
+        # List all assembled bundle contents
+        Get-ChildItem -Recurse $releaseDir
+
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: school-windows-exe
-        path: build/windows/x64/runner/Release/**
+        path: build/windows/x64/runner/Release/
