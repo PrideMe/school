@@ -30,9 +30,7 @@ jobs:
 
     - name: Build Windows Executable
       shell: cmd
-      run: |
-        flutter build windows --release --verbose
-        cmake --build build/windows/x64 --config Release --target INSTALL
+      run: flutter build windows --release --verbose
 
     - name: Upload Windows Build Artifact
       uses: actions/upload-artifact@v4
