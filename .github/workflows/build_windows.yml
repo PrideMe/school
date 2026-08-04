@@ -37,21 +37,27 @@ jobs:
       run: |
         $releaseDir = "build/windows/x64/runner/Release"
         $dataDir = "$releaseDir/data"
-        New-Item -ItemType Directory -Force -Path $dataDir
+        if (-not (Test-Path $dataDir)) { New-Item -ItemType Directory -Force -Path $dataDir }
 
         # Copy flutter_windows.dll
-        Get-ChildItem -Path . -Filter "flutter_windows.dll" -Recurse | ForEach-Object {
-          Copy-Item -Path $_.FullName -Destination $releaseDir -Force
+        $dll = Get-ChildItem -Path . -Filter "flutter_windows.dll" -Recurse | Select-Object -First 1
+        if ($dll) {
+          Write-Host "Copying $($dll.FullName) to $releaseDir"
+          Copy-Item -Path $dll.FullName -Destination $releaseDir -Force
         }
 
         # Copy icudtl.dat
-        Get-ChildItem -Path . -Filter "icudtl.dat" -Recurse | ForEach-Object {
-          Copy-Item -Path $_.FullName -Destination $dataDir -Force
+        $icu = Get-ChildItem -Path . -Filter "icudtl.dat" -Recurse | Select-Object -First 1
+        if ($icu) {
+          Write-Host "Copying $($icu.FullName) to $dataDir"
+          Copy-Item -Path $icu.FullName -Destination $dataDir -Force
         }
 
         # Copy flutter_assets
-        Get-ChildItem -Path build -Filter "flutter_assets" -Recurse -Directory | ForEach-Object {
-          Copy-Item -Path $_.FullName -Destination $dataDir -Recurse -Force
+        $assets = Get-ChildItem -Path build -Filter "flutter_assets" -Recurse -Directory | Select-Object -First 1
+        if ($assets -and -not (Test-Path "$dataDir/flutter_assets")) {
+          Write-Host "Copying $($assets.FullName) to $dataDir"
+          Copy-Item -Path $assets.FullName -Destination $dataDir -Recurse -Force
         }
 
         # List all assembled bundle contents
