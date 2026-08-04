@@ -191,6 +191,40 @@ class TechHeader extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 16),
+
+                      // Windows-style Window Controls Group
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBg,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildWindowButton(
+                              icon: Icons.remove,
+                              tooltip: '最小化',
+                              onTap: () {},
+                            ),
+                            const SizedBox(width: 4),
+                            _buildWindowButton(
+                              icon: Icons.crop_square,
+                              tooltip: '最大化',
+                              onTap: () {},
+                            ),
+                            const SizedBox(width: 4),
+                            _buildWindowButton(
+                              icon: Icons.close,
+                              tooltip: '关闭',
+                              isClose: true,
+                              onTap: () {},
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -198,6 +232,36 @@ class TechHeader extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildWindowButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onTap,
+    bool isClose = false,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: isClose
+                ? AppColors.accentRed.withOpacity(0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            icon,
+            size: 13,
+            color: isClose ? AppColors.accentRed : AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
