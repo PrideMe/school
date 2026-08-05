@@ -1,6 +1,8 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/method_channel.h>
+#include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -16,16 +18,43 @@ bool FlutterWindow::OnCreate() {
 
   RECT frame = GetClientArea();
 
-  // The size here must match the window dimensions to avoid unnecessary surface
-  // creation / destruction in the startup path.
   flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
       frame.right - frame.left, frame.bottom - frame.top, project_);
-  // Ensure that basic setup of the controller was successful.
   if (!flutter_controller_->engine() || !flutter_controller_->view()) {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+
+  // Window control MethodChannel for native drag, minimize, maximize, and close
+  auto channel = std::make_unique<flutter::MethodChannel<>>(
+      flutter_controller_->engine()->messenger(), "window_control",
+      &flutter::StandardMethodCodec::GetInstance());
+
+  channel->SetMethodCallHandler([this](const flutter::MethodCall<>& call,
+                                       std::unique_ptr<flutter::MethodResult<>> result) {
+    HWND hwnd = GetHandle();
+    if (call.method_name() == "dragWindow") {
+      ::ReleaseCapture();
+      ::SendMessage(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+      result->Success();
+    } else if (call.method_name() == "minimize") {
+      ::ShowWindow(hwnd, SW_MINIMIZE);
+      result->Success();
+    } else if (call.method_name() == "maximize") {
+      if (::IsZoomed(hwnd)) {
+        ::ShowWindow(hwnd, SW_RESTORE);
+      } else {
+        ::ShowWindow(hwnd, SW_MAXIMIZE);
+      }
+      result->Success();
+    } else if (call.method_name() == "close") {
+      ::PostMessage(hwnd, WM_CLOSE, 0, 0);
+      result->Success();
+    } else {
+      result->NotImplemented();
+    }
+  });
 
   this->Show();
 
@@ -33,9 +62,6 @@ bool FlutterWindow::OnCreate() {
     this->Show();
   });
 
-  // Flutter can complete the first frame before the "show window" callback is
-  // registered. The following call ensures a frame is pending to ensure the
-  // window is shown. It is a no-op if the first frame hasn't completed yet.
   flutter_controller_->ForceRedraw();
 
   return true;
@@ -53,7 +79,6 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
-  // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =
         flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
