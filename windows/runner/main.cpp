@@ -32,7 +32,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
   if (!window.Create(L"school", origin, size)) {
-    ::MessageBox(nullptr, L"应用初始化失败！请确认已完整解压，且目录中包含 flutter_windows.dll 与 data 文件夹。", L"智慧教育互动系统 - 启动错误", MB_ICONERROR | MB_OK);
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
