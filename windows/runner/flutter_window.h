@@ -28,6 +28,9 @@ class FlutterWindow : public Win32Window {
 
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
+
+  // Channel for window controls (drag, minimize, maximize, close)
+  std::unique_ptr<flutter::MethodChannel<>> window_control_channel_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

@@ -27,12 +27,12 @@ bool FlutterWindow::OnCreate() {
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   // Window control MethodChannel for native drag, minimize, maximize, and close
-  auto channel = std::make_unique<flutter::MethodChannel<>>(
+  window_control_channel_ = std::make_unique<flutter::MethodChannel<>>(
       flutter_controller_->engine()->messenger(), "window_control",
       &flutter::StandardMethodCodec::GetInstance());
 
-  channel->SetMethodCallHandler([this](const flutter::MethodCall<>& call,
-                                       std::unique_ptr<flutter::MethodResult<>> result) {
+  window_control_channel_->SetMethodCallHandler([this](const flutter::MethodCall<>& call,
+                                                        std::unique_ptr<flutter::MethodResult<>> result) {
     HWND hwnd = GetHandle();
     if (call.method_name() == "dragWindow") {
       ::ReleaseCapture();
@@ -68,6 +68,10 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  if (window_control_channel_) {
+    window_control_channel_ = nullptr;
+  }
+
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }
