@@ -36,6 +36,17 @@ jobs:
       shell: powershell
       run: |
         $releaseDir = "build/windows/x64/runner/Release"
+        
+        # Copy MSVC runtime DLLs (msvcp140.dll, vcruntime140.dll) to ensure standalone execution on clean Windows PCs
+        $dlls = @("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll", "msvcp140_1.dll")
+        foreach ($dll in $dlls) {
+            $sysPath = "C:\Windows\System32\$dll"
+            if (Test-Path $sysPath) {
+                Copy-Item -Path $sysPath -Destination $releaseDir -Force
+                Write-Host "Bundled $dll into release directory"
+            }
+        }
+
         Write-Host "=== VERIFYING RELEASE DIRECTORY CONTENTS ==="
         Get-ChildItem -Recurse $releaseDir
         
