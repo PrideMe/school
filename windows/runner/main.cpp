@@ -32,6 +32,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
   if (!window.Create(L"school", origin, size)) {
+    ::MessageBoxA(nullptr, "Application initialization failed. Please ensure the ZIP archive is fully extracted and the directory contains flutter_windows.dll and data folder.", "Startup Error", MB_ICONERROR | MB_OK);
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
