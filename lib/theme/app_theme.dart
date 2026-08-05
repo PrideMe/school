@@ -16,7 +16,7 @@ class AppTheme {
         background: AppColors.background,
         error: AppColors.accentRed,
       ),
-      fontFamily: 'PingFang SC',
+      fontFamily: 'AlimamaDongFangDaKai',
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         elevation: 0,
