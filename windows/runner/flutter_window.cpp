@@ -17,9 +17,13 @@ bool FlutterWindow::OnCreate() {
   }
 
   RECT frame = GetClientArea();
+  int width = frame.right - frame.left;
+  int height = frame.bottom - frame.top;
+  if (width <= 0) width = 1280;
+  if (height <= 0) height = 720;
 
   flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
-      frame.right - frame.left, frame.bottom - frame.top, project_);
+      width, height, project_);
   if (!flutter_controller_->engine() || !flutter_controller_->view()) {
     return false;
   }
