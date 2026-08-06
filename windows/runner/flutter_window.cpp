@@ -1,10 +1,27 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <fstream>
+#include <iostream>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
+
+static void LogFlutterStep(const std::string& message) {
+  std::ofstream log_file("error.log", std::ios::app);
+  if (log_file.is_open()) {
+    auto now = std::chrono::system_clock::now();
+    auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm time_info;
+    localtime_s(&time_info, &in_time_t);
+    log_file << "[" << std::puttime(&time_info, "%Y-%m-%d %H:%M:%S") << "] " << message << "\n";
+    log_file.flush();
+  }
+}
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -12,25 +29,43 @@ FlutterWindow::FlutterWindow(const flutter::DartProject& project)
 FlutterWindow::~FlutterWindow() {}
 
 bool FlutterWindow::OnCreate() {
+  LogFlutterStep("[FLUTTER] OnCreate started.");
   if (!Win32Window::OnCreate()) {
+    LogFlutterStep("[FLUTTER ERROR] Win32Window::OnCreate() returned false!");
     return false;
   }
 
   RECT frame = GetClientArea();
   int width = frame.right - frame.left;
   int height = frame.bottom - frame.top;
+
+  std::stringstream ss;
+  ss << "[FLUTTER] Measured client area: " << width << "x" << height;
+  LogFlutterStep(ss.str());
+
   if (width <= 0) width = 1280;
   if (height <= 0) height = 720;
 
+  LogFlutterStep("[FLUTTER] Instantiating FlutterViewController...");
   flutter_controller_ = std::make_unique<flutter::FlutterViewController>(
       width, height, project_);
-  if (!flutter_controller_->engine() || !flutter_controller_->view()) {
+
+  if (!flutter_controller_->engine()) {
+    LogFlutterStep("[FLUTTER ERROR] flutter_controller_->engine() is NULL!");
     return false;
   }
+  if (!flutter_controller_->view()) {
+    LogFlutterStep("[FLUTTER ERROR] flutter_controller_->view() is NULL!");
+    return false;
+  }
+
+  LogFlutterStep("[FLUTTER] Registering plugins...");
   RegisterPlugins(flutter_controller_->engine());
+
+  LogFlutterStep("[FLUTTER] Setting child content view...");
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  // Window control MethodChannel for native drag, minimize, maximize, and close
+  LogFlutterStep("[FLUTTER] Setting up window_control MethodChannel...");
   window_control_channel_ = std::make_unique<flutter::MethodChannel<>>(
       flutter_controller_->engine()->messenger(), "window_control",
       &flutter::StandardMethodCodec::GetInstance());
@@ -60,18 +95,23 @@ bool FlutterWindow::OnCreate() {
     }
   });
 
+  LogFlutterStep("[FLUTTER] Calling Show()...");
   this->Show();
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    LogFlutterStep("[FLUTTER] First frame rendered callback triggered. Showing window...");
     this->Show();
   });
 
+  LogFlutterStep("[FLUTTER] ForceRedraw()...");
   flutter_controller_->ForceRedraw();
 
+  LogFlutterStep("[FLUTTER] OnCreate completed successfully!");
   return true;
 }
 
 void FlutterWindow::OnDestroy() {
+  LogFlutterStep("[FLUTTER] OnDestroy triggered.");
   if (window_control_channel_) {
     window_control_channel_ = nullptr;
   }
